@@ -1,6 +1,10 @@
 import hashlib
+from operator import le
 import re
 import pymupdf
+import imagehash
+import io
+from PIL import Image
 
 
 # ==========================================
@@ -21,8 +25,16 @@ def render_page_snapshot(page: pymupdf.Page, zoom: float = 2.0) -> bytes:
     return pix.tobytes("png")
 
 def compute_image_hash(image_bytes: bytes, length: int = 12) -> str:
-    """Generates a deterministic SHA-256 fingerprint from image byte data."""
-    return hashlib.sha256(image_bytes).hexdigest()[:length]
+    """Generates a perceptual dHash fingerprint from image byte data."""
+    
+    # 1. Convert the raw bytes into a readable file-like stream
+    image_stream = io.BytesIO(image_bytes)
+    
+    # 2. Open the stream as a PIL Image
+    img = Image.open(image_stream)
+    
+    # 3. Compute the dHash and convert the result to a hex string
+    return str(imagehash.dhash(img, hash_size=length))
 
 def get_chapter_details(raw_header: str) -> tuple[str, str]:
     """
