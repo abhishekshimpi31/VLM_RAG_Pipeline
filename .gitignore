@@ -1,0 +1,5 @@
+data/
+extracted_data/
+*.md
+*.ipynb
+__pycache__/
