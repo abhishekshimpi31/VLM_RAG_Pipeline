@@ -28,40 +28,35 @@ def flush_pending_images_to_manifest(
 
 
 def check_and_queue_visual(
-    page: pymupdf.Page,
-    chapter_name: str,
-    images_dir: str,
-    global_registry: Dict[str, dict],
-    seen_ids: Set[str],
-    pending_section_images: List[dict]
+    page: pymupdf.Page, chapter_name: str, images_dir: str,
+    registry: Dict[str, dict], seen_ids: Set[str], pending_images: List[dict],
+    found_captions: list[dict] # <-- Now expects a list of dictionaries
 ) -> Optional[str]:
-    """
-    Evaluates visual elements on a page. Returns a markdown placeholder string if
-    visuals are present; queues cache misses for VLM inference.
-    """
-    if not page_has_visuals(page):
+    
+    if not found_captions:
         return None
 
-    png_bytes = render_page_snapshot(page)
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(2.0, 2.0))
+    png_bytes = pix.tobytes("png")
     img_hash = compute_image_hash(png_bytes)
     unique_img_id = f"IMG_{chapter_name}_{img_hash}"
     
     seen_ids.add(unique_img_id)
 
-    # Cache hit: existing summary in registry
-    if unique_img_id in global_registry:
+    if unique_img_id in registry:
         return f"\n<!-- VLM_SUMMARY:{unique_img_id} -->\n"
 
-    # Cache miss: save to disk and queue for VLM processing
     img_path = os.path.join(images_dir, f"{unique_img_id}.png")
     with open(img_path, "wb") as f:
         f.write(png_bytes)
 
-    pending_section_images.append({
-        "id": unique_img_id,
-        "path": img_path
+    # Attach the structured metadata!
+    pending_images.append({
+        "id": unique_img_id, 
+        "path": img_path,
+        "figures_metadata": found_captions # Contains [{"figure_id": "...", "caption_text": "..."}]
     })
-
+    
     return f"\n<!-- VLM_SUMMARY:{unique_img_id} -->\n"
 
 # GARBAGE COLLECTION / ORPHAN PRUNING
