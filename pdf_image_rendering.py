@@ -66,3 +66,28 @@ def get_chapter_details(raw_header: str) -> tuple[str, str]:
     print(folder_name, chap_num, chap_hash)
         
     return folder_name, chap_hash
+
+def extract_figure_captions(page_text: str) -> list[dict]:
+    """
+    Scans markdown text for explicit Figure captions.
+    Strips Markdown bolding (**) and returns clean metadata.
+    """
+    captions = []
+    paragraphs = page_text.split('\n\n')
+    
+    # Capture Group 1 extracts exactly "Figure X.Y"
+    fig_pattern = re.compile(r"^\s*(?:\*\*)?(Figure\s+\d+\.\d+)(?:\*\*)?\s*[|:]", re.IGNORECASE)
+    
+    for p in paragraphs:
+        match = fig_pattern.search(p)
+        if match:
+            figure_id = match.group(1).strip()
+            
+            clean_caption = p.replace('\n', ' ').replace('**', '').strip()
+            
+            captions.append({
+                "figure_id": figure_id,       
+                "caption_text": clean_caption  
+            })
+            
+    return captions

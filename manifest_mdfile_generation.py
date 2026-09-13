@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import re
@@ -6,8 +5,8 @@ import pymupdf
 import pymupdf4llm
 
 from context_generator import check_and_queue_visual, sanitize_pdf_text
-from file_versioning import enforce_retention_policy, get_chapter_dirs, get_latest_file, get_safe_chapter_id, get_timestamped_filename, load_file_content, save_if_changed
-from pdf_image_rendering import get_chapter_details
+from file_versioning import enforce_retention_policy, get_chapter_dirs, get_latest_file, get_timestamped_filename, load_file_content, save_if_changed
+from pdf_image_rendering import extract_figure_captions, get_chapter_details
 
 
 def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_data"):
@@ -16,7 +15,7 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
 
     # We just grab the whole line now; the helper function does the hard work
     chapter_regex = re.compile(r"^(##\s+.*)", re.MULTILINE)
-    section_regex = re.compile(r"^###\s+(.*)", re.MULTILINE)
+    section_regex = re.compile(r"^#{4,6}\s+(.*)", re.MULTILINE)
 
     # --- ACTIVE CHAPTER STATE ---
     active_folder_name = "Frontmatter"
@@ -36,10 +35,15 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
         """Flushes the current chapter to disk before moving to the next one."""
         nonlocal active_manifest, active_md, active_section_text, pending_section_images
         
+        # --- FIX: Use the updated keys ---
         for img in pending_section_images:
             active_manifest.append({
-                "image_id": img["id"], "image_path": img["path"],
-                "chapter": active_folder_name, "surrounding_context": active_section_text
+                "image_id": img["image_id"], 
+                "image_path": img["image_path"],
+                "figure_id": img["figure_id"],
+                "caption_text": img["caption_text"],
+                "chapter": active_folder_name, 
+                "surrounding_context": active_section_text
             })
             
         for existing_id in list(active_registry.keys()):
@@ -65,6 +69,9 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
 
     for page_num, chunk in enumerate(page_chunks):
         page_text = sanitize_pdf_text(chunk["text"], active_folder_name, page_num)
+        
+        # 2. Extract EXACT Figure captions from this page
+        page_captions = extract_figure_captions(page_text)
         
         # --- CHAPTER TRANSITION ---
         chapter_match = chapter_regex.search(page_text)
@@ -94,10 +101,22 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
         # --- SECTION TRANSITION ---
         if section_regex.search(page_text):
             for img in pending_section_images:
+                
+                word_count = len(active_section_text.split())
+                
+                # --- FIX: Use ['image_id'] and print the figure ID too! ---
+                print(f"  -> Queuing {img['image_id']} ({img['figure_id']}) | Context Size: {word_count} words")
+
                 active_manifest.append({
-                    "image_id": img["id"], "image_path": img["path"],
-                    "chapter": active_folder_name, "surrounding_context": active_section_text
+                    "image_id": img["image_id"], 
+                    "image_path": img["image_path"],
+                    "figure_id": img["figure_id"],
+                    "caption_text": img["caption_text"],
+                    "chapter": active_folder_name, 
+                    "surrounding_context": active_section_text
                 })
+                # ----------------------------------------------------------
+                
             active_section_text = ""
             pending_section_images = []
 
@@ -108,9 +127,11 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
         # Note: We pass active_chap_hash here so your Image IDs stay short (e.g., IMG_8f3a9b21_...)
         # instead of the massively long human-readable folder name!
         placeholder = check_and_queue_visual(
-            doc[page_num], active_chap_hash, active_dirs["images"],
-            active_registry, active_seen_ids, pending_section_images
-        )
+                    doc[page_num], active_chap_hash, active_dirs["images"],
+                    active_registry, active_seen_ids, pending_section_images,
+                    page_captions # Pass the extracted descriptions here!
+                )
+        
         if placeholder:
             active_md += placeholder
             active_section_text += placeholder

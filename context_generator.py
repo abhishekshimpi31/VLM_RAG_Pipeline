@@ -4,7 +4,7 @@ import pymupdf
 import warnings
 import re
 
-from pdf_image_rendering import compute_image_hash, page_has_visuals, render_page_snapshot
+from pdf_image_rendering import compute_image_hash
 
 
 # ==========================================
@@ -28,41 +28,53 @@ def flush_pending_images_to_manifest(
 
 
 def check_and_queue_visual(
-    page: pymupdf.Page,
-    chapter_name: str,
-    images_dir: str,
-    global_registry: Dict[str, dict],
-    seen_ids: Set[str],
-    pending_section_images: List[dict]
-) -> Optional[str]:
-    """
-    Evaluates visual elements on a page. Returns a markdown placeholder string if
-    visuals are present; queues cache misses for VLM inference.
-    """
-    if not page_has_visuals(page):
+    page: pymupdf.Page, chapter_name: str, images_dir: str,
+    registry: dict, seen_ids: set, pending_images: list,
+    found_captions: list[dict]
+) -> str:
+    
+    if not found_captions:
         return None
 
-    png_bytes = render_page_snapshot(page)
+    # 1. Snapshot and Hash
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(2.0, 2.0))
+    png_bytes = pix.tobytes("png")
     img_hash = compute_image_hash(png_bytes)
     unique_img_id = f"IMG_{chapter_name}_{img_hash}"
     
+    # Track the Image ID to prevent orphan deletion
     seen_ids.add(unique_img_id)
+    placeholders = ""
 
-    # Cache hit: existing summary in registry
-    if unique_img_id in global_registry:
-        return f"\n<!-- VLM_SUMMARY:{unique_img_id} -->\n"
+    # 2. CACHE HIT: Image exists in the registry
+    if unique_img_id in registry:
+        # Loop through the nested figures in the registry
+        for fig_id in registry[unique_img_id].keys():
+            # Dual-ID Placeholder!
+            placeholders += f"\n<!-- VLM_SUMMARY:{unique_img_id}|{fig_id} -->\n"
+        return placeholders
 
-    # Cache miss: save to disk and queue for VLM processing
+    # 3. CACHE MISS: Save the physical image once
     img_path = os.path.join(images_dir, f"{unique_img_id}.png")
-    with open(img_path, "wb") as f:
-        f.write(png_bytes)
+    if not os.path.exists(img_path):
+        with open(img_path, "wb") as f:
+            f.write(png_bytes)
 
-    pending_section_images.append({
-        "id": unique_img_id,
-        "path": img_path
-    })
-
-    return f"\n<!-- VLM_SUMMARY:{unique_img_id} -->\n"
+    # 4. Queue distinct tasks for the VLM manifest & build placeholders
+    for fig in found_captions:
+        fig_id = fig["figure_id"] # e.g., "Figure 3.3"
+        
+        pending_images.append({
+            "image_id": unique_img_id,
+            "image_path": img_path,
+            "figure_id": fig_id,
+            "caption_text": fig["caption_text"]
+        })
+        
+        # Dual-ID Placeholder!
+        placeholders += f"\n<!-- VLM_SUMMARY:{unique_img_id}|{fig_id} -->\n"
+        
+    return placeholders
 
 # GARBAGE COLLECTION / ORPHAN PRUNING
 
