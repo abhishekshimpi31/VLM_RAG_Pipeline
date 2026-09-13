@@ -5,7 +5,7 @@ import pymupdf
 import pymupdf4llm
 
 from context_generator import check_and_queue_visual, sanitize_pdf_text
-from file_versioning import enforce_retention_policy, get_chapter_dirs, get_latest_file, get_safe_chapter_id, get_timestamped_filename, load_file_content, save_if_changed
+from file_versioning import enforce_retention_policy, get_chapter_dirs, get_latest_file, get_timestamped_filename, load_file_content, save_if_changed
 from pdf_image_rendering import extract_figure_captions, get_chapter_details
 
 
@@ -35,10 +35,15 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
         """Flushes the current chapter to disk before moving to the next one."""
         nonlocal active_manifest, active_md, active_section_text, pending_section_images
         
+        # --- FIX: Use the updated keys ---
         for img in pending_section_images:
             active_manifest.append({
-                "image_id": img["id"], "image_path": img["path"],
-                "chapter": active_folder_name, "surrounding_context": active_section_text
+                "image_id": img["image_id"], 
+                "image_path": img["image_path"],
+                "figure_id": img["figure_id"],
+                "caption_text": img["caption_text"],
+                "chapter": active_folder_name, 
+                "surrounding_context": active_section_text
             })
             
         for existing_id in list(active_registry.keys()):
@@ -98,17 +103,20 @@ def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_dat
             for img in pending_section_images:
                 
                 word_count = len(active_section_text.split())
-                print(f"  -> Queuing {img['id']} | Context Size: {word_count} words")
                 
+                # --- FIX: Use ['image_id'] and print the figure ID too! ---
+                print(f"  -> Queuing {img['image_id']} ({img['figure_id']}) | Context Size: {word_count} words")
 
                 active_manifest.append({
-                    "image_id": img["id"], 
-                    "image_path": img["path"],
-                    "chapter": active_folder_name,
-                    "figures_metadata": img["figures_metadata"],
+                    "image_id": img["image_id"], 
+                    "image_path": img["image_path"],
+                    "figure_id": img["figure_id"],
+                    "caption_text": img["caption_text"],
+                    "chapter": active_folder_name, 
                     "surrounding_context": active_section_text
                 })
-
+                # ----------------------------------------------------------
+                
             active_section_text = ""
             pending_section_images = []
 
