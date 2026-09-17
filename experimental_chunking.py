@@ -16,7 +16,7 @@ import gradio as gr
 
 
 model = OllamaLLM(model="llama2", base_url="http://localhost:11434")
-DB_NAME = "vector_database/vector_db"
+DB_NAME = "vector_database/chromadb/vector_db"
 load_dotenv(override=True)
 
 knowledge_path = "data/extracted_data/**/md/*_hydrated.md"

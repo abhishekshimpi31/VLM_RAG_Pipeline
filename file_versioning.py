@@ -67,6 +67,12 @@ def get_chapter_dirs(base_dir: str, chapter_name: str) -> dict:
         os.makedirs(d, exist_ok=True)
     return dirs
 
+def get_file_hash(filepath: str) -> str:
+    hasher = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        hasher.update(f.read())
+    return hasher.hexdigest()
+
 
 def enforce_retention_policy(directory: str, days: int = 30) -> int:
     """Deletes files in a directory older than the specified retention period."""
