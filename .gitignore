@@ -3,3 +3,4 @@ extracted_data/
 *.ipynb
 __pycache__/
 vector_database/
+*.csv
