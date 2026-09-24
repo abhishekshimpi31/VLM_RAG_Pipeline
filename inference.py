@@ -147,6 +147,7 @@ def generate_answer(user_query: str):
     response = llm.invoke(formatted_prompt)
     answer_text = response.content.strip() if hasattr(response, "content") else str(response).strip()
 
+    
     return answer_text, safe_context, expanded_docs
 
 # ==============================================================================
