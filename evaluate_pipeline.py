@@ -127,11 +127,23 @@ def run_evaluation():
         target_id = item.get("target_chunk_id") or item.get("metadata", {}).get("chunk_id")
 
         # Execute generation pipeline
-        answer, safe_context, docs = generate_answer(q)
+        answer, safe_context, docs, references = generate_answer(q)
 
-        # Parse context fed to the generator
-        safe_context_split = re.split(r'--- Document \d+ ---', safe_context)
-        safe_context_list = [c.strip() for c in safe_context_split if c.strip()]
+        # print("safe_context", safe_context)
+
+        # # Parse context fed to the generator
+        # safe_context_split = re.split(r'--- Document \d+ ---', safe_context)
+        # safe_context_list = [c.strip() for c in safe_context_split if c.strip()]
+
+        try:
+            parsed_context = json.loads(safe_context)
+            # Extract ONLY the text content for IR metrics and Ragas
+            safe_context_list = [item["content"] for item in parsed_context]
+        except json.JSONDecodeError:
+            print(f"[ERROR] Failed to parse safe_context JSON for query: {q}")
+            safe_context_list = []
+
+        # print("safe_context_list", safe_context_list)
 
         # 1. Deterministic IR Metrics
         relevance_list = determine_relevance(safe_context_list, target_id, ref_context, docs)

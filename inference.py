@@ -18,14 +18,15 @@ from bm25_hybrid import get_hybrid_retriever
 
 QUERY_EXPANSION_PROMPT = PromptTemplate.from_template(
     """You are a strict search optimization assistant for a professional retrieval-augmented generation (RAG) system.
-Your task is to rewrite the user's search query to maximize retrieval accuracy from a vector database.
+Your task is to evaluate and potentially rewrite the user's search query to maximize retrieval accuracy from a vector database.
 
 RULES:
-1. Vocabulary Normalization: Translate colloquial visual or structural terms (e.g., "image", "picture", "graph", "chart", "page") into standard formal nomenclature (e.g., "Figure", "Table", "Section", "Appendix") based on typical professional formatting.
-2. Exact Identifier Preservation: Keep all numbers, alphanumeric IDs, dates, and proper nouns (e.g., "3.20", "3.SM.1", "Q3", "John Doe") EXACTLY intact. 
-3. Semantic Expansion: If the query is extremely sparse (e.g., "What does Figure 3.20 show?"), append broad contextual keywords like "data, findings, description, analysis" to increase search surface area.
-4. Strict Context Adherence: You must only expand on the exact topic requested. You are strictly forbidden from attempting to answer the user's question or introducing external concepts. 
-5. Output Format: Respond ONLY in valid JSON format with a single key "expanded_query".
+1. Conditional Modification: ONLY modify the query if it is overly sparse, lacks context, or uses colloquial terminology. If the query is already detailed, well-formulated, and uses proper terminology, return it EXACTLY as-is without any changes.
+2. Vocabulary Normalization: Translate colloquial visual or structural terms (e.g., "image", "picture", "graph", "chart") into standard formal nomenclature (e.g., "Figure", "Table", "Section") based on typical professional formatting.
+3. Exact Identifier Preservation: Keep all numbers, alphanumeric IDs, dates, and proper nouns (e.g., "3.20", "3.SM.1", "Q3", "John Doe") EXACTLY intact. 
+4. Natural Semantic Expansion: If rewriting a sparse query (e.g., "What does Figure 3.20 show?"), do not just append disconnected keywords. Instead, rewrite it into a natural, context-rich sentence (e.g., "Describe the data, findings, and analytical context presented in Figure 3.20.").
+5. Strict Context Adherence: You must only expand on the exact topic requested. You are strictly forbidden from attempting to answer the user's question, guessing the topic, or introducing external facts. 
+6. Output Format: Respond ONLY in valid JSON format with a single key "expanded_query".
 
 USER QUERY:
 {query}
@@ -36,23 +37,28 @@ JSON RESPONSE:"""
 # ==============================================================================
 #  HARDENED SCIENTIFIC PROMPT TEMPLATE (Faithfulness >= 0.95)
 # ==============================================================================
-PROMPT_TEMPLATE_TEXT = """You are an authoritative IPCC scientific assessment assistant.
-Answer the user's question using ONLY the factual evidence provided in the context below.
+PROMPT_TEMPLATE_TEXT = """You are an expert analytical assistant and strict fact-synthesizer. Your sole purpose is to extract and summarize information EXCLUSIVELY from the provided source documents.
+You will be provided with a JSON array of source documents. Each document contains 'metadata', 'content', and a 'document_index'.
 
-CRITICAL INSTRUCTIONS:
-1. STRICT ADHERENCE: Base your entire answer strictly on the provided context documents. Do not assume, extrapolate, or bring in outside knowledge.
-2. EXACT FIGURES & CONFIDENCE: Quote quantitative values, anomalies, time intervals, and IPCC calibrated uncertainty terms (e.g., "high confidence", "very likely", "medium confidence") exactly as they appear.
-3. CONFLICTS / GAPS: If the context does not explicitly provide the facts needed to answer the question, do not speculate. State exactly:
-   "I do not have enough information in the provided context to answer this question."
+CRITICAL INSTRUCTIONS FOR MAXIMUM FAITHFULNESS:
+1. ZERO OUTSIDE KNOWLEDGE: Your answer must be 100% grounded in the provided JSON context. Do not include any external knowledge, assumptions, logical leaps, or explanations that are not explicitly stated in the text. Even if you know a fact to be true, if it is not in the context, DO NOT mention it.
+2. EXACT QUANTIFICATION: Quote all numerical values, percentages, dates, and calibrated uncertainty terms (e.g., "high confidence", "very likely") exactly as they appear in the source. Do not round numbers or approximate.
+3. HANDLING MISSING INFORMATION: 
+   - If the context completely lacks the facts needed to answer the question, you must state EXACTLY: "I do not have enough information in the provided context to answer this question."
+   - If the context only partially answers the question, provide ONLY the information present in the text and do not guess the rest.
+4. MANDATORY CITATIONS: Every single sentence or distinct factual claim you write MUST be immediately followed by its source citation using the 'document_index' in square brackets (e.g., [1]). 
+   - STRICT RULE: If a sentence cannot be directly cited to the provided text, you are not allowed to write that sentence.
+   - Example: "Global mean sea level increased by 0.20m between 1901 and 2018 [1]. This rate is faster than any preceding century in at least 3000 years [2]."
 
---------------------
-CONTEXT DOCUMENTS:
+JSON CONTEXT:
 {context}
---------------------
 
-QUESTION: {question}
+USER QUESTION: 
+{question}
 
-SCIENTIFIC ANSWER:"""
+Synthesize a direct, highly accurate answer based ONLY on the context above. Include citations for every claim:"""
+
+
 
 STRICT_QA_PROMPT = PromptTemplate(
     template=PROMPT_TEMPLATE_TEXT,
@@ -88,7 +94,7 @@ def expand_query(original_query: str) -> str:
         chain = QUERY_EXPANSION_PROMPT | llm
         response = chain.invoke({"query": original_query})
 
-        print(response)
+        # print(response)
         
         # 1. Safely extract the raw string from the LLM
         raw_text = response.content if hasattr(response, "content") else str(response)
@@ -117,6 +123,60 @@ def expand_query(original_query: str) -> str:
 # 4. Initialize the fused hybrid retriever (k=8 per retriever, fused via RRF)
 # ==============================================================================
 hybrid_child_retriever = get_hybrid_retriever(k=8, vector_weight=0.5, bm25_weight=0.5)
+
+
+def format_references(safe_context_json: str):
+    """
+    Transforms the JSON context used by the LLM into clean, 
+    enterprise-grade citation dictionaries for frontend UI consumption.
+    """
+    references = []
+    
+    # 1. Parse the JSON string back into a Python list of dictionaries
+    try:
+        context_data = json.loads(safe_context_json)
+    except json.JSONDecodeError:
+        print("[ERROR] Failed to parse safe_context JSON for formatting references.")
+        return []
+    
+    # 2. Iterate through the dictionaries
+    for doc in context_data:
+        # Use bracket notation for dictionaries, NOT dot notation
+        meta = doc.get("metadata", {})
+        idx = doc.get("document_index")
+        
+        # Build human-readable breadcrumb hierarchy
+        headers = [
+            meta.get("Chapter", "").replace("**", ""),
+            meta.get("Subsection", ""),
+            meta.get("Subsubsection", ""),
+            meta.get("Subsubsubsubection", "")
+        ]
+        breadcrumb = " > ".join([h for h in headers if h])
+        
+        # Format filename cleanly
+        source_path = meta.get("source", "")
+        file_name = os.path.basename(source_path) if source_path else "Unknown Document"
+        
+        ref_entry = {
+            "citation_index": idx,
+            "display_title": file_name.replace("_hydrated.md", "").replace("_", " "),
+            "breadcrumb": breadcrumb,
+            "source_file": file_name,
+            "figures": meta.get("has_figures", []),
+            "tables": meta.get("has_tables", []),
+            # Use doc["content"] instead of doc.page_content
+            "content_snippet": doc.get("content", "")[:300] + "...", 
+            "lineage": {
+                "parent_id": meta.get("parent_id", meta.get("chunk_id")),
+                "parent_hash": meta.get("parent_hash", ""),
+                "version_hash": meta.get("version_hash", ""),
+                "last_updated": meta.get("last_updated", "")
+            }
+        }
+        references.append(ref_entry)
+        
+    return references
 
 def generate_answer(user_query: str):
     """
@@ -200,7 +260,11 @@ def generate_answer(user_query: str):
 
     safe_context = build_safe_context(expanded_docs, max_tokens=5000)  # 10k token budget for LLM context
 
-    print("safe_context", safe_context)
+    # print("safe_context", safe_context)
+
+
+    references = format_references(safe_context)
+
 
     # -------------------------------------------------------------------------
     # STAGE 5: FAITHFUL GENERATION
@@ -214,16 +278,16 @@ def generate_answer(user_query: str):
     answer_text = response.content if hasattr(response, "content") else str(response)
     # answer_text = response.content.strip() if hasattr(response, "content") else str(response).strip()
 
-    print("answer_text", answer_text)
+    # print("answer_text", answer_text)
 
     
-    return answer_text, safe_context, expanded_docs
+    return answer_text, safe_context, expanded_docs, references
 
 # ==============================================================================
 # 4. EXECUTION
 # ==============================================================================
 if __name__ == "__main__":
-    user_query = "What does image 3.20 show?"
+    user_query = "What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850\u20131900?"
     try:
         generate_answer(user_query= user_query)
         

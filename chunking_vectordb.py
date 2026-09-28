@@ -254,10 +254,12 @@ def process_and_ingest():
                 section.metadata["has_tables"] = tables
                 section.metadata["version_hash"] = current_hash
                 section.metadata["last_updated"] = formatted_date
+                section.metadata["parent_id"] = current_hash
                 
                 # 1. Create a sequential, deterministic ID for this parent chunk
                 chunk_id = f"{current_hash}_{idx:04d}"
                 section.metadata["chunk_id"] = chunk_id
+                
 
                 # Only link to the FOLLOWING chunk
                 if idx < len(ast_sections) - 1:
