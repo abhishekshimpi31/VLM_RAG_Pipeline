@@ -2,6 +2,8 @@ import glob
 import os
 from datetime import datetime 
 import logging
+import json
+import re
 
 from dotenv import load_dotenv
 from transformers import AutoTokenizer
@@ -109,33 +111,97 @@ retriever = ParentDocumentRetriever(
     }
 )
 
-def build_safe_context(docs, max_tokens=2500):
+def build_safe_context(docs, max_tokens=3000):
     """
-    Iterates through retrieved chunks, calculates precise Llama-2 tokens, 
-    and stops adding text if it hits the maximum token budget.
+    Iterates through retrieved chunks, formats them as dictionaries,
+    calculates exact Llama tokens, and enforces the token budget.
+    Returns a JSON-formatted string of the context to pass to the LLM.
     """
-    context = ""
+    context_list = []
     total_tokens = 0
     
     print("\n[INFO] Calculating Context Tokens...")
     
     for i, doc in enumerate(docs, 1):
-        # 1. Measure the exact Llama-2 tokens for this specific document
-        doc_tokens = len(llm_tokenizer.encode(doc.page_content, add_special_tokens=False))
+        # 1. Structure the document and its metadata as a dictionary
+        doc_dict = {
+            "document_index": i,
+            "metadata": doc.metadata,
+            "content": doc.page_content
+        }
+        
+        # 2. Convert to a JSON string to measure the exact tokens
+        doc_json_str = json.dumps(doc_dict, indent=2)
+        
+        # 3. Measure exact tokens for this specific JSON block
+        doc_tokens = len(llm_tokenizer.encode(doc_json_str, add_special_tokens=False))
         print(f"       -> Document {i}: {doc_tokens} tokens")
         
-        # 2. Check if adding this document would blow up our LLM's memory
+        # 4. Check if adding this document blows the LLM memory budget
         if total_tokens + doc_tokens > max_tokens:
             print(f"       -> [SKIPPED] Document {i} ({doc_tokens} tokens) - Exceeds budget.")
-            break # Stop adding documents
+            break 
             
-        # 3. Add to our total and append to the context string
+        # 5. Add to our context list and update the total token count
         print(f"       -> [ADDED] Document {i}: {doc_tokens} tokens")
-        context += f"\n\n--- Document {i} ---\n{doc.page_content}"
+        context_list.append(doc_dict)
         total_tokens += doc_tokens
         
     print(f"[INFO] Final Context Size: {total_tokens}/{max_tokens} tokens.")
-    return context
+    
+    # Return the list of dictionaries as a clean JSON string for the prompt
+    return json.dumps(context_list, indent=2)
+
+
+# def build_safe_context(docs, max_tokens=2500):
+#     """
+#     Iterates through retrieved chunks, calculates precise Llama-2 tokens, 
+#     and stops adding text if it hits the maximum token budget.
+#     """
+#     context = ""
+#     total_tokens = 0
+    
+#     print("\n[INFO] Calculating Context Tokens...")
+    
+#     for i, doc in enumerate(docs, 1):
+#         # 1. Measure the exact Llama-2 tokens for this specific document
+#         doc_tokens = len(llm_tokenizer.encode(doc.page_content, add_special_tokens=False))
+#         print(f"       -> Document {i}: {doc_tokens} tokens")
+        
+#         # 2. Check if adding this document would blow up our LLM's memory
+#         if total_tokens + doc_tokens > max_tokens:
+#             print(f"       -> [SKIPPED] Document {i} ({doc_tokens} tokens) - Exceeds budget.")
+#             break # Stop adding documents
+            
+#         # 3. Add to our total and append to the context string
+#         print(f"       -> [ADDED] Document {i}: {doc_tokens} tokens")
+#         context += f"\n\n--- Document {i} ---\n{doc.page_content}"
+#         total_tokens += doc_tokens
+        
+#     print(f"[INFO] Final Context Size: {total_tokens}/{max_tokens} tokens.")
+#     return context
+
+
+def enrich_visual_metadata(sections):
+    """
+    Scans chunk content for references to Figures and Tables and 
+    injects them into the document metadata for precise filtering.
+    """
+    # Matches 'Figure 3.20', 'Fig 1.2', 'Image 4.1'
+    fig_pattern = re.compile(r"(?:image|figure|fig\.?)\s*([\d\.]+)", re.IGNORECASE)
+
+    # Matches 'Table 2.1', 'Tbl 4.5'
+    tbl_pattern = re.compile(r"(?:Table|Tbl\.?)\s*(\d+(?:[\w\.\-]*\w)?)", re.IGNORECASE)
+
+    figures = list(set(fig_pattern.findall(sections.page_content)))
+    tables = list(set(tbl_pattern.findall(sections.page_content)))
+
+    # if len(figures) == 0:
+    #     figures = []
+    # if tables:
+    #     sections.metadata["has_table"] = tables
+
+    return figures, tables
 
 # -------------------------------------------------------------
 # 4. Core Action Wrappers
@@ -179,8 +245,13 @@ def process_and_ingest():
             ast_sections = parent_splitter.split_text(doc.page_content)
             
             for idx, section in enumerate(ast_sections):
+
+                figures, tables =  enrich_visual_metadata(sections=section)
+
                 section.metadata["doc_type"] = doc_type
                 section.metadata["source"] = filepath
+                section.metadata["has_figures"] = figures
+                section.metadata["has_tables"] = tables
                 section.metadata["version_hash"] = current_hash
                 section.metadata["last_updated"] = formatted_date
                 
