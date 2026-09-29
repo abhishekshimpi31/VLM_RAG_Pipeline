@@ -8,8 +8,13 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.load import loads
 
 from pdf_image_rendering import clean_markdown_text
+
+# Import your actual instantiated docstore from your ingestion module
+# Adjust this import path based on where you defined your 'store' object
+from chunking_vectordb import store, banned_headers
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
@@ -128,5 +133,106 @@ def generate_dataset():
     print(f"\n[SUCCESS] Generated {len(dataset)} evaluation pairs. Saved to {OUTPUT_FILE}")
 
 
+
+# 1. Configuration
+OUTPUT_FILE = "data/extracted_data/testing_data/retrieval_benchmark.json"
+NUM_CHUNKS_TO_PROCESS = 10
+
+# 2. Simplified Teacher Prompt
+prompt = PromptTemplate(
+    template="""You are an expert climate scientist creating a search benchmark for an IPCC report.
+    Read the following document section and generate 2 highly specific questions that can ONLY be answered by retrieving this exact text.
+    
+    Return ONLY a valid JSON object with a single key called "questions" containing an array of strings.
+    Example format:
+    {{
+      "questions": [
+        "What is the primary driver of...",
+        "How does the data in this section show a 2% increase in..."
+      ]
+    }}
+
+    DOCUMENT TEXT:
+    {context}
+    """,
+    input_variables=["context"]
+)
+
+generation_chain = prompt | llm | JsonOutputParser()
+
+def is_core_science(doc) -> bool:
+    """Evaluates if a document is core science using metadata tag or the shared banned_headers list."""
+    tier = doc.metadata.get("content_tier")
+    if tier:
+        return tier == "core_science"
+
+    # Fallback to the single source of truth for banned headers
+    header_context = " ".join(str(v) for v in doc.metadata.values()).lower()
+    return not any(term in header_context for term in banned_headers)
+
+
+def generate_retriver_dataset():
+    print("[INFO] Fetching parent documents directly from the docstore...")
+
+    keys = list(store.yield_keys())
+    if not keys:
+        print("[ERROR] Docstore is empty! Please run your ingestion script first.")
+        return
+
+    raw_parent_docs = store.mget(keys)
+    parent_docs = []
+
+    for raw_doc in raw_parent_docs:
+        if raw_doc:
+            try:
+                parent_docs.append(loads(raw_doc.decode("utf-8")))
+            except Exception as e:
+                logging.warning(f"Failed to deserialize a document: {e}")
+
+    # Filter candidates strictly before applying the slice limit
+    valid_parents = [
+        doc
+        for doc in parent_docs
+        if doc and len(doc.page_content.split()) > 100 and is_core_science(doc)
+    ][:NUM_CHUNKS_TO_PROCESS]
+
+    print(
+        f"[INFO] Generating queries for {len(valid_parents)} valid core_science parent documents...\n"
+    )
+
+    dataset = []
+
+    for i, section in enumerate(tqdm(valid_parents, desc="Generating Benchmark")):
+        try:
+            clean_text = clean_markdown_text(section.page_content)
+            if len(clean_text.split()) < 30:
+                continue
+
+            result = generation_chain.invoke({"context": clean_text})
+            questions = result.get("questions", [])
+            if not isinstance(questions, list):
+                continue
+
+            target_id = section.metadata.get("parent_id") or section.metadata.get(
+                "chunk_id"
+            )
+
+            for q in questions:
+                dataset.append(
+                    {"question": q, "target_parent_id": target_id}
+                )
+
+        except Exception as e:
+            logging.warning(f"Failed to process docstore chunk {i}: {e}")
+            continue
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(dataset, f, indent=4)
+
+    print(
+        f"\n[SUCCESS] Generated {len(dataset)} evaluation queries. Saved to {OUTPUT_FILE}"
+    )
+
 if __name__ == "__main__":
-    generate_dataset()
+    # generate_dataset()
+    generate_retriver_dataset()

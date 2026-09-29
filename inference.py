@@ -1,21 +1,23 @@
 import logging
 import os
 import re
+import json
+
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.documents import Document
-import json
 
 from FlagEmbedding import FlagReranker
+from qdrant_client.http import models as rest
 
 # Safely import pre-configured components from the ingestion script
-from chunking_vectordb import build_safe_context, retriever, token_length, client
+from chunking_vectordb import build_safe_context, retriever, client, vector_store
 from dynamic_splitter import expand_following_neighbors
 
-from bm25_hybrid import get_hybrid_retriever
 
-
-
+# ==============================================================================
+# PROMPTS
+# ==============================================================================
 QUERY_EXPANSION_PROMPT = PromptTemplate.from_template(
     """You are a strict search optimization assistant for a professional retrieval-augmented generation (RAG) system.
 Your task is to evaluate and potentially rewrite the user's search query to maximize retrieval accuracy from a vector database.
@@ -34,9 +36,6 @@ USER QUERY:
 JSON RESPONSE:"""
 )
 
-# ==============================================================================
-#  HARDENED SCIENTIFIC PROMPT TEMPLATE (Faithfulness >= 0.95)
-# ==============================================================================
 PROMPT_TEMPLATE_TEXT = """You are an expert analytical assistant and strict fact-synthesizer. Your sole purpose is to extract and summarize information EXCLUSIVELY from the provided source documents.
 You will be provided with a JSON array of source documents. Each document contains 'metadata', 'content', and a 'document_index'.
 
@@ -58,27 +57,22 @@ USER QUESTION:
 
 Synthesize a direct, highly accurate answer based ONLY on the context above. Include citations for every claim:"""
 
-
-
 STRICT_QA_PROMPT = PromptTemplate(
     template=PROMPT_TEMPLATE_TEXT,
     input_variables=["context", "question"]
 )
 
 # ==============================================================================
-# 1. LLM SETUP
+# 1. LLM & RERANKER SETUP
 # ==============================================================================
 print("[INFO] Loading Ollama Llama-3.1...")
-llm = Ollama(model="llama3.1", temperature=0.1, num_ctx=6000, verbose=False)
+llm = Ollama(model="llama3.1", temperature=0.1, num_ctx=8000, verbose=False)
 
-# ==============================================================================
-# 2. RERANKER SETUP
-# ==============================================================================
 print("[INFO] Loading FlagReranker...")
 reranker = FlagReranker('BAAI/bge-reranker-large', use_fp16=True)
 
 # ==============================================================================
-# 3. ROUTER & GENERATION PIPELINE
+# 2. UTILITY FUNCTIONS
 # ==============================================================================
 def is_global_summary_query(query: str) -> bool:
     trigger_words = ["list all figures", "all images", "summary of all visual", "what images are in"]
@@ -86,28 +80,17 @@ def is_global_summary_query(query: str) -> bool:
 
 
 def expand_query(original_query: str) -> str:
-    """
-    Rewrites the user's query to normalize scientific vocabulary.
-    Includes robust regex parsing to handle Llama-3 markdown quirks.
-    """
     try:
         chain = QUERY_EXPANSION_PROMPT | llm
         response = chain.invoke({"query": original_query})
-
-        # print(response)
         
-        # 1. Safely extract the raw string from the LLM
         raw_text = response.content if hasattr(response, "content") else str(response)
-        
-        # 2. Use regex to extract ONLY the JSON dictionary, ignoring any markdown backticks
         json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
         
         if not json_match:
             raise ValueError(f"No JSON object found in response: {raw_text}")
             
         clean_json_string = json_match.group(0)
-        
-        # 3. Parse the cleaned string
         response_data = json.loads(clean_json_string)
         expanded = response_data.get("expanded_query", original_query)
         
@@ -115,37 +98,22 @@ def expand_query(original_query: str) -> str:
         return expanded
         
     except Exception as e:
-        # Fallback to the original query if the LLM fails completely
         logging.warning(f"Query expansion failed: {e}. Using original query.")
         return original_query
 
-# ==============================================================================
-# 4. Initialize the fused hybrid retriever (k=8 per retriever, fused via RRF)
-# ==============================================================================
-hybrid_child_retriever = get_hybrid_retriever(k=8, vector_weight=0.5, bm25_weight=0.5)
-
 
 def format_references(safe_context_json: str):
-    """
-    Transforms the JSON context used by the LLM into clean, 
-    enterprise-grade citation dictionaries for frontend UI consumption.
-    """
     references = []
-    
-    # 1. Parse the JSON string back into a Python list of dictionaries
     try:
         context_data = json.loads(safe_context_json)
     except json.JSONDecodeError:
         print("[ERROR] Failed to parse safe_context JSON for formatting references.")
         return []
     
-    # 2. Iterate through the dictionaries
     for doc in context_data:
-        # Use bracket notation for dictionaries, NOT dot notation
         meta = doc.get("metadata", {})
         idx = doc.get("document_index")
         
-        # Build human-readable breadcrumb hierarchy
         headers = [
             meta.get("Chapter", "").replace("**", ""),
             meta.get("Subsection", ""),
@@ -154,7 +122,6 @@ def format_references(safe_context_json: str):
         ]
         breadcrumb = " > ".join([h for h in headers if h])
         
-        # Format filename cleanly
         source_path = meta.get("source", "")
         file_name = os.path.basename(source_path) if source_path else "Unknown Document"
         
@@ -165,7 +132,6 @@ def format_references(safe_context_json: str):
             "source_file": file_name,
             "figures": meta.get("has_figures", []),
             "tables": meta.get("has_tables", []),
-            # Use doc["content"] instead of doc.page_content
             "content_snippet": doc.get("content", "")[:300] + "...", 
             "lineage": {
                 "parent_id": meta.get("parent_id", meta.get("chunk_id")),
@@ -178,120 +144,173 @@ def format_references(safe_context_json: str):
         
     return references
 
-def generate_answer(user_query: str):
+
+# ==============================================================================
+# DEBUG FUNCTION: Child-Level Search
+# ==============================================================================
+def child_reranking(user_query: str):
     """
-    Two-Stage Industrial RAG Inference:
-    1. Broad child-vector search via Qdrant (k=8)
-    2. Deep Cross-Attention reranking with BGE-Reranker-Large (Top-3)
-    3. Docstore parent resolution (ParentDocumentRetriever)
-    4. Sibling chunk expansion & token budgeting
-    5. Grounded LLM generation
-    
-    Returns:
-        tuple: (answer_text, safe_context, expanded_docs)
+    Standalone diagnostic function to test direct child-level retrieval 
+    and BGE cross-encoder reranking. 
     """
+    print("\n[DEBUG] Executing direct child vector search...")
+    child_docs_retrieved = vector_store.similarity_search(
+        user_query, 
+        k=20,
+        filter=rest.Filter(
+            must=[
+                rest.FieldCondition(
+                    key="metadata.content_tier",
+                    match=rest.MatchValue(value="core_science")
+                )
+            ]
+        )
+    )
 
-    # 1. Expand the query to fix vocabulary mismatches
-    optimized_query = expand_query(user_query)
+    if not child_docs_retrieved:
+        print("[DEBUG] No child documents retrieved.")
+        return None
 
-    print(f"[INFO] Expanded Query: '{optimized_query}'")
+    pairs = [[user_query, doc.page_content] for doc in child_docs_retrieved]
+    scores = reranker.compute_score(pairs)
+    if isinstance(scores, float):
+        scores = [scores]
+
+    scored_children = sorted(zip(child_docs_retrieved, scores), key=lambda x: x[1], reverse=True)
+
+    ordered_parent_ids = []
+    seen_ids = set()
+
+    for child, score in scored_children:
+        parent_id = child.metadata.get("parent_id") or child.metadata.get("chunk_id")
+        if parent_id and parent_id not in seen_ids:
+            seen_ids.add(parent_id)
+            ordered_parent_ids.append(parent_id)
+
+    parent_docs = []
+    if ordered_parent_ids:
+        # Fetch only the Top 3 unique parents to safely fit the context budget
+        raw_parents = retriever.docstore.mget(ordered_parent_ids[:3])
+        parent_docs = [p for p in raw_parents if p is not None]
+
+    # Fallback to children if parent lookup fails
+    base_docs_for_expansion = parent_docs if parent_docs else [doc for doc, score in scored_children]
+
+    print(f"[DEBUG] Ordered Parent IDs from Children: {ordered_parent_ids}")
+    print(f"[DEBUG] Unique Parent IDs count: {len(seen_ids)}\n")
+    return child_docs_retrieved, ordered_parent_ids, base_docs_for_expansion
+
+
+def parent_reranking(user_query: str):
+    """
+    Standalone diagnostic function to test direct parent-level retrieval 
+    and BGE cross-encoder reranking. 
+    """
+    print("\n Executing direct parent vector search...")
+    # -------------------------------------------------------------------------
+    # STAGE 1: BROAD PARENT RETRIEVAL (WITH FILTER INJECTED)
+    # -------------------------------------------------------------------------
+    # Inject the filter so Qdrant ignores bibliographies/noise during the underlying child search
+    retriever.search_kwargs = {
+        "k": 20, 
+        "filter": rest.Filter(
+            must=[
+                rest.FieldCondition(
+                    key="metadata.content_tier",
+                    match=rest.MatchValue(value="core_science")
+                )
+            ]
+        )
+    }
+
+    # retriever.invoke returns the full Parent Documents
+    retrieved_parents = retriever.invoke(user_query)
+
+    if not retrieved_parents:
+        return "I do not have enough information in the provided context to answer this question.", "", [], []
 
     # -------------------------------------------------------------------------
-    # STAGE 1: BROAD CHILD RETRIEVAL
+    # STAGE 2: CROSS-ENCODER RERANKING
     # -------------------------------------------------------------------------
-    # Query raw child chunks in Qdrant (Markdown AST Tier 5)
-    # k=8 gives the bi-encoder sufficient breadth without memory bloat
-    # child_docs = retriever.vectorstore.similarity_search(
-    #     optimized_query,
-    #     k=10
-    # )
-
-    # print("child_docs", child_docs)
-
-    child_docs = hybrid_child_retriever.invoke(optimized_query)
-
-    if not child_docs:
-        return "I do not have enough information in the provided context to answer this question.", "", []
-
-    # -------------------------------------------------------------------------
-    # STAGE 2: CROSS-ENCODER RERANKING (AT CHILD LEVEL)
-    # -------------------------------------------------------------------------
-    # Pairs fit comfortably inside BGE-Reranker's 512-token context limit
-    pairs = [[user_query, doc.page_content] for doc in child_docs]
+    # Note: BGE Reranker will only score the first 512 tokens of these parent documents
+    pairs = [[user_query, doc.page_content] for doc in retrieved_parents]
     scores = reranker.compute_score(pairs)
     
     if isinstance(scores, float):
         scores = [scores]
 
-    # Rank children descending by cross-encoder logit scores
-    scored_children = sorted(zip(child_docs, scores), key=lambda x: x[1], reverse=True)
-    top_children = [doc for doc, score in scored_children[:3]]
+    scored_parents = sorted(zip(retrieved_parents, scores), key=lambda x: x[1], reverse=True)
+    top_parents = [doc for doc, score in scored_parents[:3]]
+
+    return retrieved_parents, scored_parents, top_parents
+
+
+# ==============================================================================
+# 3. MAIN INFERENCE PIPELINE
+# ==============================================================================
+def generate_context(user_query: str):
+    """
+    Production RAG Inference:
+    1. Parent retrieval via filtered retriever.invoke
+    2. Reranking fetched Parent docs
+    3. Sibling chunk expansion & token budgeting
+    """
+    
+    # -------------------------------------------------------------------------
+    # Child Reranking
+    # -------------------------------------------------------------------------
+    retrieved_parents, ordered_parent_ids, base_docs_for_expansion = child_reranking(user_query)
 
     # -------------------------------------------------------------------------
-    # STAGE 3: DEDUPLICATED PARENT RESOLUTION FROM DOCSTORE
+    # Parent Reranking
     # -------------------------------------------------------------------------
-    # Resolve the small child chunks back to their complete Parent AST sections
-    id_key = getattr(retriever, "id_key", "doc_id")
-    ordered_parent_ids = []
-    seen_ids = set()
-
-    for child in top_children:
-        parent_id = child.metadata.get(id_key)
-        if parent_id and parent_id not in seen_ids:
-            seen_ids.add(parent_id)
-            ordered_parent_ids.append(parent_id)
-
-    # Fetch parent documents from the underlying docstore
-    parent_docs = []
-    if ordered_parent_ids:
-        raw_parents = retriever.docstore.mget(ordered_parent_ids)
-        parent_docs = [p for p in raw_parents if p is not None]
-
-    # Fallback to children if parent lookup returns empty
-    base_docs_for_expansion = parent_docs if parent_docs else top_children
+    # retrieved_parents, scored_parents, top_parents = parent_reranking(user_query)
 
     # -------------------------------------------------------------------------
-    # STAGE 4: FORWARD NEIGHBOR EXPANSION & SAFE CONTEXT BUDGETING
+    # STAGE 3: FORWARD NEIGHBOR EXPANSION & SAFE CONTEXT BUDGETING
     # -------------------------------------------------------------------------
     expanded_docs = [
         expand_following_neighbors(doc, retriever=retriever, min_tokens=1000)
         for doc in base_docs_for_expansion
     ]
 
-    safe_context = build_safe_context(expanded_docs, max_tokens=5000)  # 10k token budget for LLM context
-
-    # print("safe_context", safe_context)
-
-
+    # Expanded to 6000+ budget to accommodate the bulky parent docs and neighbors
+    safe_context = build_safe_context(expanded_docs, max_tokens=5000)
     references = format_references(safe_context)
 
+    return safe_context, expanded_docs, references, retrieved_parents
 
-    # -------------------------------------------------------------------------
-    # STAGE 5: FAITHFUL GENERATION
-    # -------------------------------------------------------------------------
+
+def generate_answer(user_query: str):
+    
+    # Optional: Enable Query Expansion if needed
+    # optimized_query = expand_query(user_query)
+    # safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=optimized_query)
+    
+    safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=user_query)
+
     formatted_prompt = STRICT_QA_PROMPT.format(
-        context=safe_context,
-        question=user_query
-    )
-
+            context=safe_context,
+            question=user_query
+        )
+    
     response = llm.invoke(formatted_prompt)
     answer_text = response.content if hasattr(response, "content") else str(response)
-    # answer_text = response.content.strip() if hasattr(response, "content") else str(response).strip()
 
-    # print("answer_text", answer_text)
+    print("\n[ANSWER]\n", answer_text)
 
-    
-    return answer_text, safe_context, expanded_docs, references
+    return answer_text, safe_context, expanded_docs, references, retrieved_parents
+
 
 # ==============================================================================
 # 4. EXECUTION
 # ==============================================================================
 if __name__ == "__main__":
-    user_query = "What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850\u20131900?"
+    test_query = "What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850\u20131900?"
+    
     try:
-        generate_answer(user_query= user_query)
+        generate_answer(user_query=test_query)
         
     finally:
-        # Ensures clean database shutdown even if an error occurs
         print("\n[INFO] Closing database connections...")
         client.close()

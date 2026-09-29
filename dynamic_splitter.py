@@ -6,7 +6,7 @@ tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v
 def token_length(text: str) -> int:
     return len(tokenizer.encode(text, add_special_tokens=False, truncation=True, max_length=999999))
 
-def expand_following_neighbors(doc: Document, retriever, min_tokens=1000, max_chunk_ceiling=2500) -> Document:
+def expand_following_neighbors(doc: Document, retriever, min_tokens=700, max_chunk_ceiling=1200) -> Document:
     """
     Expands small chunks forward only by chaining subsequent sections 
     from the docstore until reaching min_tokens or running out of following text.

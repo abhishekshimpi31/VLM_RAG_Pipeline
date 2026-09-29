@@ -1,6 +1,7 @@
 import glob
 import os
-from datetime import datetime 
+import hashlib
+from datetime import datetime
 import logging
 import json
 import re
@@ -12,13 +13,13 @@ from qdrant_client import models
 
 # LangChain Imports
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_qdrant import QdrantVectorStore, FastEmbedSparse
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_classic.storage import LocalFileStore
-from langchain_qdrant import QdrantVectorStore
 
-# Your custom module
+# Your custom modules
 from dynamic_splitter import token_length
 from file_versioning import get_file_hash 
 
@@ -32,7 +33,8 @@ tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
 llm_tokenizer = AutoTokenizer.from_pretrained("hf-internal-testing/llama-tokenizer")
 
 QDRANT_DB_PATH = "vector_database/quadrant_database/qdrant_db"
-DOCSTORE_PATH = "vector_database/quadrant_database/docstore" # Moved outside of qdrant_db to prevent file lock issues
+DOCSTORE_PATH = "vector_database/quadrant_database/docstore"
+COLLECTION_NAME = "ipcc_hybrid_chunks"
 
 # -------------------------------------------------------------
 # 1. Initialize Models (With Production Normalization)
@@ -48,35 +50,41 @@ embedding_model = HuggingFaceEmbeddings(
     }
 )
 
+sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
+
 # -------------------------------------------------------------
-# 2. Setup Qdrant & Disk-Tiering (Hardware Optimization)
+# 2. Setup Qdrant & Disk-Tiering
 # -------------------------------------------------------------
 logging.info("Setting up Qdrant and Parent Document Store...")
 client = QdrantClient(path=QDRANT_DB_PATH)
-collection_name = "ipcc_child_chunks"
 
-# Only create the collection if it doesn't exist. This allows us to run 
-# the script incrementally day after day without wiping the whole DB!
-if not client.collection_exists(collection_name):
+if not client.collection_exists(COLLECTION_NAME):
     client.create_collection(
-        collection_name=collection_name,
-        vectors_config=models.VectorParams(size=1024, distance=models.Distance.COSINE),
-        # --- PRODUCTION OPTIMIZATIONS ---
-        on_disk_payload=True,  # Moves heavy metadata to SSD
-        hnsw_config=models.HnswConfigDiff(on_disk=True),  # Moves vector index to SSD
+        collection_name=COLLECTION_NAME,
+        vectors_config={
+            "dense": models.VectorParams(size=1024, distance=models.Distance.COSINE)
+        },
+        sparse_vectors_config={
+            "sparse": models.SparseVectorParams(index=models.SparseIndexParams(on_disk=True))
+        },
+        on_disk_payload=True, 
+        hnsw_config=models.HnswConfigDiff(on_disk=True), 
         optimizers_config=models.OptimizersConfigDiff(default_segment_number=2)
     )
 
 vector_store = QdrantVectorStore(
     client=client, 
-    collection_name=collection_name, 
-    embedding=embedding_model
+    collection_name=COLLECTION_NAME, 
+    embedding=embedding_model,
+    sparse_embedding=sparse_embeddings,
+    vector_name="dense",
+    sparse_vector_name="sparse"
 )
 
 store = LocalFileStore(DOCSTORE_PATH)
 
 # -------------------------------------------------------------
-# 3. Setup the AST Splitters
+# 3. Setup the Splitters
 # -------------------------------------------------------------
 headers_to_split_on = [
     ("#", "Chapter"),
@@ -86,12 +94,22 @@ headers_to_split_on = [
     ("#####", "Subsubsubection"),
     ("######", "Subsubsubsubection")
 ]
-# CRITICAL: strip_headers MUST be False so the LLM can read the section titles
+
+# 1. Markdown Splitter
 parent_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on, strip_headers=False)
 
+# 2. Size-Capped Parent Splitter (Prevents token overflow on massive sections)
+parent_size_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1500,
+    chunk_overlap=200,
+    length_function=token_length,
+    separators=["\n\n", "\n", ". ", " ", ""]
+)
+
+# 3. Granular Child Splitter (Restored exactly to your original parameters)
 child_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=200,          
-    chunk_overlap=50,
+    chunk_size=400,          
+    chunk_overlap=100,
     length_function=token_length,
     separators=["\n\n", "\n> ", "\n", " ", ""],
     keep_separator=True, 
@@ -103,19 +121,35 @@ retriever = ParentDocumentRetriever(
     vectorstore=vector_store,
     byte_store=store,
     child_splitter=child_splitter,
-    search_type="mmr",               
+    search_type="similarity", # Qdrant automatically fuses dense/sparse here            
     search_kwargs={
-        "k": 3,                      
-        "fetch_k": 20,
-        "score_threshold": 0.50              
+        "k": 20  # Fixed: fetch_k removed for native similarity search
     }
 )
 
+banned_headers = [
+    "references", 
+    "bibliography", 
+    "contributing authors", 
+    "lead authors",
+    "acknowledgements",
+    "table of contents", 
+    "list of figures",
+    "list of tables",
+    "data availability",
+    "review editors",
+    "chapter scientists",
+    "coordinating lead authors",
+    "this chapter should be cited as"
+]
+
+# -------------------------------------------------------------
+# 4. Restored Helper Functions
+# -------------------------------------------------------------
 def build_safe_context(docs, max_tokens=3000):
     """
     Iterates through retrieved chunks, formats them as dictionaries,
     calculates exact Llama tokens, and enforces the token budget.
-    Returns a JSON-formatted string of the context to pass to the LLM.
     """
     context_list = []
     total_tokens = 0
@@ -123,91 +157,44 @@ def build_safe_context(docs, max_tokens=3000):
     print("\n[INFO] Calculating Context Tokens...")
     
     for i, doc in enumerate(docs, 1):
-        # 1. Structure the document and its metadata as a dictionary
         doc_dict = {
             "document_index": i,
             "metadata": doc.metadata,
             "content": doc.page_content
         }
         
-        # 2. Convert to a JSON string to measure the exact tokens
         doc_json_str = json.dumps(doc_dict, indent=2)
-        
-        # 3. Measure exact tokens for this specific JSON block
         doc_tokens = len(llm_tokenizer.encode(doc_json_str, add_special_tokens=False))
-        print(f"       -> Document {i}: {doc_tokens} tokens")
         
-        # 4. Check if adding this document blows the LLM memory budget
         if total_tokens + doc_tokens > max_tokens:
             print(f"       -> [SKIPPED] Document {i} ({doc_tokens} tokens) - Exceeds budget.")
             break 
             
-        # 5. Add to our context list and update the total token count
         print(f"       -> [ADDED] Document {i}: {doc_tokens} tokens")
         context_list.append(doc_dict)
         total_tokens += doc_tokens
         
     print(f"[INFO] Final Context Size: {total_tokens}/{max_tokens} tokens.")
-    
-    # Return the list of dictionaries as a clean JSON string for the prompt
     return json.dumps(context_list, indent=2)
-
-
-# def build_safe_context(docs, max_tokens=2500):
-#     """
-#     Iterates through retrieved chunks, calculates precise Llama-2 tokens, 
-#     and stops adding text if it hits the maximum token budget.
-#     """
-#     context = ""
-#     total_tokens = 0
-    
-#     print("\n[INFO] Calculating Context Tokens...")
-    
-#     for i, doc in enumerate(docs, 1):
-#         # 1. Measure the exact Llama-2 tokens for this specific document
-#         doc_tokens = len(llm_tokenizer.encode(doc.page_content, add_special_tokens=False))
-#         print(f"       -> Document {i}: {doc_tokens} tokens")
-        
-#         # 2. Check if adding this document would blow up our LLM's memory
-#         if total_tokens + doc_tokens > max_tokens:
-#             print(f"       -> [SKIPPED] Document {i} ({doc_tokens} tokens) - Exceeds budget.")
-#             break # Stop adding documents
-            
-#         # 3. Add to our total and append to the context string
-#         print(f"       -> [ADDED] Document {i}: {doc_tokens} tokens")
-#         context += f"\n\n--- Document {i} ---\n{doc.page_content}"
-#         total_tokens += doc_tokens
-        
-#     print(f"[INFO] Final Context Size: {total_tokens}/{max_tokens} tokens.")
-#     return context
 
 
 def enrich_visual_metadata(sections):
     """
-    Scans chunk content for references to Figures and Tables and 
-    injects them into the document metadata for precise filtering.
+    Scans chunk content for references to Figures and Tables.
+    Restored to accept the section object directly.
     """
-    # Matches 'Figure 3.20', 'Fig 1.2', 'Image 4.1'
-    fig_pattern = re.compile(r"(?:image|figure|fig\.?)\s*([\d\.]+)", re.IGNORECASE)
-
-    # Matches 'Table 2.1', 'Tbl 4.5'
+    fig_pattern = re.compile(r"(?:image|figure|fig\.?)\s*(\d+(?:[\w\.\-]*\w)?)", re.IGNORECASE)
     tbl_pattern = re.compile(r"(?:Table|Tbl\.?)\s*(\d+(?:[\w\.\-]*\w)?)", re.IGNORECASE)
 
     figures = list(set(fig_pattern.findall(sections.page_content)))
     tables = list(set(tbl_pattern.findall(sections.page_content)))
 
-    # if len(figures) == 0:
-    #     figures = []
-    # if tables:
-    #     sections.metadata["has_table"] = tables
-
     return figures, tables
 
 # -------------------------------------------------------------
-# 4. Core Action Wrappers
+# 5. Core Action Wrappers
 # -------------------------------------------------------------
 def process_and_ingest():
-    """Handles the folder traversal, versioning deletion, and batched vectorization."""
     folders = glob.glob("data/extracted_data/**/md/")
     logging.info(f"Found {len(folders)} markdown folders for ingestion.")
 
@@ -226,14 +213,13 @@ def process_and_ingest():
         
             logging.info(f"Processing {filepath} | Version Hash: {current_hash[:8]}")
 
-            # Delete OLD vectors for this specific file before adding new ones
             client.delete(
-                collection_name=collection_name,
+                collection_name=COLLECTION_NAME,
                 points_selector=models.FilterSelector(
                     filter=models.Filter(
                         must=[
                             models.FieldCondition(
-                                key="metadata.source",  # LangChain nests metadata under the 'metadata' key [1.1.3]
+                                key="metadata.source",
                                 match=models.MatchValue(value=filepath)
                             )
                         ]
@@ -241,12 +227,33 @@ def process_and_ingest():
                 )
             )
             
-            # Split text into AST parent sections
+            # Step 1: Split into AST sections
             ast_sections = parent_splitter.split_text(doc.page_content)
-            
-            for idx, section in enumerate(ast_sections):
 
-                figures, tables =  enrich_visual_metadata(sections=section)
+            clean_ast_sections = []
+            for section in ast_sections:
+                # Flatten all header metadata into a single lowercase string
+                header_text = " ".join(str(v) for v in section.metadata.values()).lower()
+                
+                # Tag the section based on whether it contains banned keywords
+                if any(banned in header_text for banned in banned_headers):
+                    section.metadata["content_tier"] = "noise"
+                else:
+                    section.metadata["content_tier"] = "core_science"
+                    
+                clean_ast_sections.append(section)
+
+            # Now pass the tagged sections to your size-capper
+            file_parent_docs = []
+            for section in clean_ast_sections:
+                bounded_parents = parent_size_splitter.split_documents([section])
+                file_parent_docs.extend(bounded_parents)
+            
+            for idx, section in enumerate(file_parent_docs):
+                figures, tables = enrich_visual_metadata(sections=section)
+                parent_content_hash = hashlib.sha256(section.page_content.encode("utf-8")).hexdigest()
+                
+                chunk_id = f"{current_hash[:16]}_p{idx:04d}"
 
                 section.metadata["doc_type"] = doc_type
                 section.metadata["source"] = filepath
@@ -254,24 +261,19 @@ def process_and_ingest():
                 section.metadata["has_tables"] = tables
                 section.metadata["version_hash"] = current_hash
                 section.metadata["last_updated"] = formatted_date
-                section.metadata["parent_id"] = current_hash
                 
-                # 1. Create a sequential, deterministic ID for this parent chunk
-                chunk_id = f"{current_hash}_{idx:04d}"
+                # Lineage
+                section.metadata["parent_id"] = chunk_id
+                section.metadata["parent_hash"] = parent_content_hash
                 section.metadata["chunk_id"] = chunk_id
                 
-
-                # Only link to the FOLLOWING chunk
-                if idx < len(ast_sections) - 1:
-                    section.metadata["next_id"] = f"{current_hash}_{idx + 1:04d}"
+                if idx < len(file_parent_docs) - 1:
+                    section.metadata["next_id"] = f"{current_hash[:16]}_p{idx + 1:04d}"
 
                 all_parent_docs.append(section)
 
-    # -------------------------------------------------------------
-    # 5. Batched Vectorization (Prevents RAM crashes)
-    # -------------------------------------------------------------
     if all_parent_docs:
-        BATCH_SIZE = 150
+        BATCH_SIZE = 100
         logging.info(f"Extracted {len(all_parent_docs)} Parent Sections. Starting Batched Ingestion...")
         
         for i in range(0, len(all_parent_docs), BATCH_SIZE):
@@ -280,17 +282,11 @@ def process_and_ingest():
             retriever.add_documents(batch, ids=batch_ids)
             logging.info(f" -> Ingested batch {i//BATCH_SIZE + 1}/{(len(all_parent_docs)//BATCH_SIZE) + 1}")
 
-        logging.info(f"Ingestion complete!")
-        logging.info(f" -> Child Vectors searchable in Qdrant: {client.count(collection_name).count}")
+        logging.info("Ingestion complete!")
+        logging.info(f" -> Child Vectors searchable in Qdrant: {client.count(COLLECTION_NAME).count}")
     else:
         logging.warning("No documents found to ingest!")
 
-# ==========================================
-# Execution Block (Safe for running locally)
-# ==========================================
 if __name__ == "__main__":
-    
-    # 1. OPTIONAL: Trigger the ingestion process
-    # Comment this out if you just want to test inference!
     process_and_ingest()
     vector_store.client.close()

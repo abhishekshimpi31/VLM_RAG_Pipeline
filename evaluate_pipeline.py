@@ -127,7 +127,7 @@ def run_evaluation():
         target_id = item.get("target_chunk_id") or item.get("metadata", {}).get("chunk_id")
 
         # Execute generation pipeline
-        answer, safe_context, docs, references = generate_answer(q)
+        answer, safe_context, docs, references, retrieved_parents = generate_answer(q)
 
         # print("safe_context", safe_context)
 
