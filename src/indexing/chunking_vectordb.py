@@ -19,9 +19,15 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_classic.storage import LocalFileStore
 
-# Your custom modules
-from dynamic_splitter import token_length
-from file_versioning import get_file_hash 
+# Custom module imports with package and standalone fallback
+try:
+    from .dynamic_splitter import token_length
+    from ..common.file_versioning import get_file_hash 
+    import config
+except ImportError:
+    from dynamic_splitter import token_length
+    from file_versioning import get_file_hash 
+    import config
 
 # -------------------------------------------------------------
 # 0. System Configuration
@@ -29,12 +35,14 @@ from file_versioning import get_file_hash
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-large-en-v1.5")
-llm_tokenizer = AutoTokenizer.from_pretrained("hf-internal-testing/llama-tokenizer")
+QDRANT_DB_PATH = getattr(config, "QDRANT_DB_PATH", "vector_database/quadrant_database/qdrant_db")
+DOCSTORE_PATH = getattr(config, "DOCSTORE_PATH", "vector_database/quadrant_database/docstore")
+COLLECTION_NAME = getattr(config, "COLLECTION_NAME", "ipcc_hybrid_chunks")
+EMBEDDING_MODEL_NAME = getattr(config, "EMBEDDING_MODEL_NAME", "BAAI/bge-large-en-v1.5")
+LLM_TOKENIZER_NAME = getattr(config, "LLM_TOKENIZER_NAME", "hf-internal-testing/llama-tokenizer")
 
-QDRANT_DB_PATH = "vector_database/quadrant_database/qdrant_db"
-DOCSTORE_PATH = "vector_database/quadrant_database/docstore"
-COLLECTION_NAME = "ipcc_hybrid_chunks"
+tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL_NAME)
+llm_tokenizer = AutoTokenizer.from_pretrained(LLM_TOKENIZER_NAME)
 
 # -------------------------------------------------------------
 # 1. Initialize Models (With Production Normalization)
@@ -42,7 +50,7 @@ COLLECTION_NAME = "ipcc_hybrid_chunks"
 logging.info("Initializing Embedding Model...")
 
 embedding_model = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-large-en-v1.5",
+    model_name=EMBEDDING_MODEL_NAME,
     encode_kwargs={'normalize_embeddings': True},
     query_encode_kwargs={
         "normalize_embeddings": True,
@@ -50,12 +58,15 @@ embedding_model = HuggingFaceEmbeddings(
     }
 )
 
-sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
+sparse_embeddings = FastEmbedSparse(model_name=getattr(config, "SPARSE_MODEL_NAME", "Qdrant/bm25"))
 
 # -------------------------------------------------------------
 # 2. Setup Qdrant & Disk-Tiering
 # -------------------------------------------------------------
 logging.info("Setting up Qdrant and Parent Document Store...")
+os.makedirs(QDRANT_DB_PATH, exist_ok=True)
+os.makedirs(DOCSTORE_PATH, exist_ok=True)
+
 client = QdrantClient(path=QDRANT_DB_PATH)
 
 if not client.collection_exists(COLLECTION_NAME):
@@ -86,30 +97,30 @@ store = LocalFileStore(DOCSTORE_PATH)
 # -------------------------------------------------------------
 # 3. Setup the Splitters
 # -------------------------------------------------------------
-headers_to_split_on = [
+headers_to_split_on = getattr(config, "HEADERS_TO_SPLIT_ON", [
     ("#", "Chapter"),
     ("##", "Section"),
     ("###", "Subsection"),
     ("####", "Subsubsection"),
     ("#####", "Subsubsubection"),
     ("######", "Subsubsubsubection")
-]
+])
 
 # 1. Markdown Splitter
 parent_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on, strip_headers=False)
 
 # 2. Size-Capped Parent Splitter (Prevents token overflow on massive sections)
 parent_size_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1500,
-    chunk_overlap=200,
+    chunk_size=getattr(config, "PARENT_CHUNK_SIZE", 1500),
+    chunk_overlap=getattr(config, "PARENT_CHUNK_OVERLAP", 200),
     length_function=token_length,
     separators=["\n\n", "\n", ". ", " ", ""]
 )
 
 # 3. Granular Child Splitter (Restored exactly to your original parameters)
 child_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=400,          
-    chunk_overlap=100,
+    chunk_size=getattr(config, "CHILD_CHUNK_SIZE", 400),          
+    chunk_overlap=getattr(config, "CHILD_CHUNK_OVERLAP", 100),
     length_function=token_length,
     separators=["\n\n", "\n> ", "\n", " ", ""],
     keep_separator=True, 
@@ -123,11 +134,11 @@ retriever = ParentDocumentRetriever(
     child_splitter=child_splitter,
     search_type="similarity", # Qdrant automatically fuses dense/sparse here            
     search_kwargs={
-        "k": 20  # Fixed: fetch_k removed for native similarity search
+        "k": getattr(config, "RETRIEVAL_TOP_K", 20)  # Fixed: fetch_k removed for native similarity search
     }
 )
 
-banned_headers = [
+banned_headers = getattr(config, "BANNED_HEADERS", [
     "references", 
     "bibliography", 
     "contributing authors", 
@@ -141,7 +152,7 @@ banned_headers = [
     "chapter scientists",
     "coordinating lead authors",
     "this chapter should be cited as"
-]
+])
 
 # -------------------------------------------------------------
 # 4. Restored Helper Functions
@@ -195,7 +206,11 @@ def enrich_visual_metadata(sections):
 # 5. Core Action Wrappers
 # -------------------------------------------------------------
 def process_and_ingest():
-    folders = glob.glob("data/extracted_data/**/md/")
+    search_path = "data/extracted_data/**/md/"
+    folders = glob.glob(search_path)
+    if not folders and hasattr(config, "EXTRACTED_DATA_DIR"):
+        folders = glob.glob(os.path.join(str(config.EXTRACTED_DATA_DIR), "**/md/"))
+        
     logging.info(f"Found {len(folders)} markdown folders for ingestion.")
 
     all_parent_docs = []
@@ -273,7 +288,7 @@ def process_and_ingest():
                 all_parent_docs.append(section)
 
     if all_parent_docs:
-        BATCH_SIZE = 100
+        BATCH_SIZE = getattr(config, "INGESTION_BATCH_SIZE", 100)
         logging.info(f"Extracted {len(all_parent_docs)} Parent Sections. Starting Batched Ingestion...")
         
         for i in range(0, len(all_parent_docs), BATCH_SIZE):

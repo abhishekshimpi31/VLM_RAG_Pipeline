@@ -10,31 +10,30 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.load import loads
 
-from pdf_image_rendering import clean_markdown_text
+from ..ingestion.pdf_image_rendering import clean_markdown_text
+from ..indexing.chunking_vectordb import store, banned_headers
+import config
 
-# Import your actual instantiated docstore from your ingestion module
-# Adjust this import path based on where you defined your 'store' object
-from chunking_vectordb import store, banned_headers
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # 1. Configuration
 BASE_DATA_DIR = "data/extracted_data/**/md/"
-OUTPUT_FILE = "data/extracted_data/testing_data/ground_truth_dataset.json"
+OUTPUT_FILE = getattr(config, "GROUND_TRUTH_DATASET_PATH", "data/extracted_data/testing_data/ground_truth_dataset.json")
 NUM_CHUNKS_TO_PROCESS = 500 # Limit this during testing so it doesn't run for hours
 
 # Use a stronger local model if possible, and enforce JSON output
 print("[INFO] Loading Ollama for Synthetic Generation...")
-llm = ChatOllama(model="llama3", temperature=0.1, format="json")
+llm = ChatOllama(model=getattr(config, "LLM_MODEL_NAME", "llama3"), temperature=0.1, format="json")
 
 # 2. Setup Splitter (Must match your ingestion pipeline)
-headers_to_split_on = [
+headers_to_split_on = getattr(config, "HEADERS_TO_SPLIT_ON", [
     ("#", "Chapter"),
     ("##", "Section"),
     ("###", "Subsection"),
     ("####", "Subsubsection"),
     ("#####", "Subsubsubection")
-]
+])
 parent_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on, strip_headers=False)
 
 # 3. Define the Teacher Prompt
@@ -65,6 +64,9 @@ generation_chain = prompt | llm | JsonOutputParser()
 def generate_dataset():
     # 4. Load Documents
     folders = glob.glob(BASE_DATA_DIR)
+    if not folders and hasattr(config, "EXTRACTED_DATA_DIR"):
+        folders = glob.glob(os.path.join(str(config.EXTRACTED_DATA_DIR), "**/md/"))
+        
     all_sections = []
     
     print("[INFO] Loading and splitting markdown files...")
@@ -127,19 +129,18 @@ def generate_dataset():
             continue
 
     # 6. Save to Disk
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(dataset, f, indent=4)
         
     print(f"\n[SUCCESS] Generated {len(dataset)} evaluation pairs. Saved to {OUTPUT_FILE}")
 
 
-
-# 1. Configuration
-OUTPUT_FILE = "data/extracted_data/testing_data/retrieval_benchmark.json"
-NUM_CHUNKS_TO_PROCESS = 10
+# 1. Configuration for Retrieval Benchmark
+RETRIEVAL_OUTPUT_FILE = getattr(config, "RETRIEVAL_BENCHMARK_PATH", "data/extracted_data/testing_data/retrieval_benchmark.json")
 
 # 2. Simplified Teacher Prompt
-prompt = PromptTemplate(
+retrieval_prompt = PromptTemplate(
     template="""You are an expert climate scientist creating a search benchmark for an IPCC report.
     Read the following document section and generate 2 highly specific questions that can ONLY be answered by retrieving this exact text.
     
@@ -158,7 +159,7 @@ prompt = PromptTemplate(
     input_variables=["context"]
 )
 
-generation_chain = prompt | llm | JsonOutputParser()
+retrieval_generation_chain = retrieval_prompt | llm | JsonOutputParser()
 
 def is_core_science(doc) -> bool:
     """Evaluates if a document is core science using metadata tag or the shared banned_headers list."""
@@ -208,7 +209,7 @@ def generate_retriver_dataset():
             if len(clean_text.split()) < 30:
                 continue
 
-            result = generation_chain.invoke({"context": clean_text})
+            result = retrieval_generation_chain.invoke({"context": clean_text})
             questions = result.get("questions", [])
             if not isinstance(questions, list):
                 continue
@@ -226,11 +227,12 @@ def generate_retriver_dataset():
             logging.warning(f"Failed to process docstore chunk {i}: {e}")
             continue
 
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(RETRIEVAL_OUTPUT_FILE), exist_ok=True)
+    with open(RETRIEVAL_OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(dataset, f, indent=4)
 
     print(
-        f"\n[SUCCESS] Generated {len(dataset)} evaluation queries. Saved to {OUTPUT_FILE}"
+        f"\n[SUCCESS] Generated {len(dataset)} evaluation queries. Saved to {RETRIEVAL_OUTPUT_FILE}"
     )
 
 if __name__ == "__main__":

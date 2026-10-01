@@ -4,12 +4,33 @@ import re
 import pymupdf
 import pymupdf4llm
 
-from context_generator import check_and_queue_visual, sanitize_pdf_text
-from file_versioning import enforce_retention_policy, get_chapter_dirs, get_latest_file, get_timestamped_filename, load_file_content, save_if_changed
-from pdf_image_rendering import extract_figure_captions, get_chapter_details
+try:
+    from .context_generator import check_and_queue_visual, sanitize_pdf_text
+    from .pdf_image_rendering import extract_figure_captions, get_chapter_details
+    from ..common.file_versioning import (
+        enforce_retention_policy, 
+        get_chapter_dirs, 
+        get_latest_file, 
+        get_timestamped_filename, 
+        load_file_content, 
+        save_if_changed
+    )
+    import config
+except ImportError:
+    from context_generator import check_and_queue_visual, sanitize_pdf_text
+    from pdf_image_rendering import extract_figure_captions, get_chapter_details
+    from file_versioning import (
+        enforce_retention_policy, 
+        get_chapter_dirs, 
+        get_latest_file, 
+        get_timestamped_filename, 
+        load_file_content, 
+        save_if_changed
+    )
+    import config
 
 
-def extract_document_context(pdf_path: str, base_output_dir: str = "pipeline_data"):
+def extract_document_context(pdf_path: str, base_output_dir: str = "data/extracted_data/"):
     doc = pymupdf.open(pdf_path)
     page_chunks = pymupdf4llm.to_markdown(doc, page_chunks=True)
 

@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import json
+from typing import Optional, List, Dict, Any
+import time
 
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
@@ -10,66 +12,67 @@ from langchain_core.documents import Document
 from FlagEmbedding import FlagReranker
 from qdrant_client.http import models as rest
 
-# Safely import pre-configured components from the ingestion script
-from chunking_vectordb import build_safe_context, retriever, client, vector_store
-from dynamic_splitter import expand_following_neighbors
+from ..indexing.chunking_vectordb import build_safe_context, retriever, client, vector_store
+from ..indexing.dynamic_splitter import expand_following_neighbors
+import config
 
 
 # ==============================================================================
-# PROMPTS
+# PROMPTS (Imported from central config)
 # ==============================================================================
-QUERY_EXPANSION_PROMPT = PromptTemplate.from_template(
-    """You are a strict search optimization assistant for a professional retrieval-augmented generation (RAG) system.
-Your task is to evaluate and potentially rewrite the user's search query to maximize retrieval accuracy from a vector database.
+QUERY_EXPANSION_PROMPT_TEMPLATE = config.QUERY_EXPANSION_PROMPT_TEMPLATE
+QA_PROMPT_TEMPLATE = config.QA_PROMPT_TEMPLATE
+PROMPT_TEMPLATE_TEXT = QA_PROMPT_TEMPLATE
 
-RULES:
-1. Conditional Modification: ONLY modify the query if it is overly sparse, lacks context, or uses colloquial terminology. If the query is already detailed, well-formulated, and uses proper terminology, return it EXACTLY as-is without any changes.
-2. Vocabulary Normalization: Translate colloquial visual or structural terms (e.g., "image", "picture", "graph", "chart") into standard formal nomenclature (e.g., "Figure", "Table", "Section") based on typical professional formatting.
-3. Exact Identifier Preservation: Keep all numbers, alphanumeric IDs, dates, and proper nouns (e.g., "3.20", "3.SM.1", "Q3", "John Doe") EXACTLY intact. 
-4. Natural Semantic Expansion: If rewriting a sparse query (e.g., "What does Figure 3.20 show?"), do not just append disconnected keywords. Instead, rewrite it into a natural, context-rich sentence (e.g., "Describe the data, findings, and analytical context presented in Figure 3.20.").
-5. Strict Context Adherence: You must only expand on the exact topic requested. You are strictly forbidden from attempting to answer the user's question, guessing the topic, or introducing external facts. 
-6. Output Format: Respond ONLY in valid JSON format with a single key "expanded_query".
-
-USER QUERY:
-{query}
-
-JSON RESPONSE:"""
-)
-
-PROMPT_TEMPLATE_TEXT = """You are an expert analytical assistant and strict fact-synthesizer. Your sole purpose is to extract and summarize information EXCLUSIVELY from the provided source documents.
-You will be provided with a JSON array of source documents. Each document contains 'metadata', 'content', and a 'document_index'.
-
-CRITICAL INSTRUCTIONS FOR MAXIMUM FAITHFULNESS:
-1. ZERO OUTSIDE KNOWLEDGE: Your answer must be 100% grounded in the provided JSON context. Do not include any external knowledge, assumptions, logical leaps, or explanations that are not explicitly stated in the text. Even if you know a fact to be true, if it is not in the context, DO NOT mention it.
-2. EXACT QUANTIFICATION: Quote all numerical values, percentages, dates, and calibrated uncertainty terms (e.g., "high confidence", "very likely") exactly as they appear in the source. Do not round numbers or approximate.
-3. HANDLING MISSING INFORMATION: 
-   - If the context completely lacks the facts needed to answer the question, you must state EXACTLY: "I do not have enough information in the provided context to answer this question."
-   - If the context only partially answers the question, provide ONLY the information present in the text and do not guess the rest.
-4. MANDATORY CITATIONS: Every single sentence or distinct factual claim you write MUST be immediately followed by its source citation using the 'document_index' in square brackets (e.g., [1]). 
-   - STRICT RULE: If a sentence cannot be directly cited to the provided text, you are not allowed to write that sentence.
-   - Example: "Global mean sea level increased by 0.20m between 1901 and 2018 [1]. This rate is faster than any preceding century in at least 3000 years [2]."
-
-JSON CONTEXT:
-{context}
-
-USER QUESTION: 
-{question}
-
-Synthesize a direct, highly accurate answer based ONLY on the context above. Include citations for every claim:"""
+QUERY_EXPANSION_PROMPT = PromptTemplate.from_template(QUERY_EXPANSION_PROMPT_TEMPLATE)
 
 STRICT_QA_PROMPT = PromptTemplate(
-    template=PROMPT_TEMPLATE_TEXT,
+    template=QA_PROMPT_TEMPLATE,
     input_variables=["context", "question"]
 )
+
+CONVERSATIONAL_QA_PROMPT_TEMPLATE = getattr(config, "CONVERSATIONAL_QA_PROMPT_TEMPLATE", QA_PROMPT_TEMPLATE)
+CONVERSATIONAL_QA_PROMPT = PromptTemplate(
+    template=CONVERSATIONAL_QA_PROMPT_TEMPLATE,
+    input_variables=["context", "chat_history", "question"]
+)
+
+CONDENSE_QUESTION_PROMPT_TEMPLATE = getattr(config, "CONDENSE_QUESTION_PROMPT_TEMPLATE", "")
+if CONDENSE_QUESTION_PROMPT_TEMPLATE:
+    CONDENSE_QUESTION_PROMPT = PromptTemplate(
+        template=CONDENSE_QUESTION_PROMPT_TEMPLATE,
+        input_variables=["chat_history", "question"]
+    )
+else:
+    CONDENSE_QUESTION_PROMPT = None
+
+
+def format_chat_history(chat_history: list) -> str:
+    """Formats message history [{'role': 'user'|'assistant', 'content': '...'}] into dialogue string."""
+    if not chat_history:
+        return ""
+    lines = []
+    for msg in chat_history[-6:]:  # Keep up to last 3 conversation turns
+        role = "User" if msg.get("role") == "user" else "Assistant"
+        content = msg.get("content", "").strip()
+        if content:
+            lines.append(f"{role}: {content}")
+    return "\n".join(lines)
+
 
 # ==============================================================================
 # 1. LLM & RERANKER SETUP
 # ==============================================================================
-print("[INFO] Loading Ollama Llama-3.1...")
-llm = Ollama(model="llama3.1", temperature=0.1, num_ctx=8000, verbose=False)
+llm_model_name = getattr(config, "LLM_MODEL_NAME", "llama3.1")
+llm_temp = getattr(config, "LLM_TEMPERATURE", 0.1)
+llm_ctx = getattr(config, "LLM_NUM_CTX", 8000)
+reranker_model = getattr(config, "RERANKER_MODEL_NAME", "BAAI/bge-reranker-large")
 
-print("[INFO] Loading FlagReranker...")
-reranker = FlagReranker('BAAI/bge-reranker-large', use_fp16=True)
+print(f"[INFO] Loading Ollama {llm_model_name}...")
+llm = Ollama(model=llm_model_name, temperature=llm_temp, num_ctx=llm_ctx, verbose=False)
+
+print(f"[INFO] Loading FlagReranker ({reranker_model})...")
+reranker = FlagReranker(reranker_model, use_fp16=True)
 
 # ==============================================================================
 # 2. UTILITY FUNCTIONS
@@ -146,17 +149,19 @@ def format_references(safe_context_json: str):
 
 
 # ==============================================================================
-# DEBUG FUNCTION: Child-Level Search
+# Child-Level Reranking
 # ==============================================================================
 def child_reranking(user_query: str):
     """
     Standalone diagnostic function to test direct child-level retrieval 
     and BGE cross-encoder reranking. 
     """
+    start_seq = time.perf_counter()
+
     print("\n[DEBUG] Executing direct child vector search...")
     child_docs_retrieved = vector_store.similarity_search(
         user_query, 
-        k=20,
+        k=getattr(config, "RETRIEVAL_TOP_K", 20),
         filter=rest.Filter(
             must=[
                 rest.FieldCondition(
@@ -169,14 +174,17 @@ def child_reranking(user_query: str):
 
     if not child_docs_retrieved:
         print("[DEBUG] No child documents retrieved.")
-        return None
+        return None, [], []
 
     pairs = [[user_query, doc.page_content] for doc in child_docs_retrieved]
-    scores = reranker.compute_score(pairs)
+    scores = reranker.compute_score(pairs, batch_size=1)
     if isinstance(scores, float):
         scores = [scores]
 
     scored_children = sorted(zip(child_docs_retrieved, scores), key=lambda x: x[1], reverse=True)
+
+    seq_duration = (time.perf_counter() - start_seq) * 1000  # Convert to ms
+    print("seq_duration", seq_duration)
 
     ordered_parent_ids = []
     seen_ids = set()
@@ -190,7 +198,7 @@ def child_reranking(user_query: str):
     parent_docs = []
     if ordered_parent_ids:
         # Fetch only the Top 3 unique parents to safely fit the context budget
-        raw_parents = retriever.docstore.mget(ordered_parent_ids[:3])
+        raw_parents = retriever.docstore.mget(ordered_parent_ids[:getattr(config, "RERANKER_TOP_K", 3)])
         parent_docs = [p for p in raw_parents if p is not None]
 
     # Fallback to children if parent lookup fails
@@ -212,7 +220,7 @@ def parent_reranking(user_query: str):
     # -------------------------------------------------------------------------
     # Inject the filter so Qdrant ignores bibliographies/noise during the underlying child search
     retriever.search_kwargs = {
-        "k": 20, 
+        "k": getattr(config, "RETRIEVAL_TOP_K", 20), 
         "filter": rest.Filter(
             must=[
                 rest.FieldCondition(
@@ -240,7 +248,7 @@ def parent_reranking(user_query: str):
         scores = [scores]
 
     scored_parents = sorted(zip(retrieved_parents, scores), key=lambda x: x[1], reverse=True)
-    top_parents = [doc for doc, score in scored_parents[:3]]
+    top_parents = [doc for doc, score in scored_parents[:getattr(config, "RERANKER_TOP_K", 3)]]
 
     return retrieved_parents, scored_parents, top_parents
 
@@ -270,26 +278,53 @@ def generate_context(user_query: str):
     # STAGE 3: FORWARD NEIGHBOR EXPANSION & SAFE CONTEXT BUDGETING
     # -------------------------------------------------------------------------
     expanded_docs = [
-        expand_following_neighbors(doc, retriever=retriever, min_tokens=1000)
+        expand_following_neighbors(doc, retriever=retriever, min_tokens=getattr(config, "EXPANSION_MIN_TOKENS", 1000))
         for doc in base_docs_for_expansion
     ]
 
-    # Expanded to 6000+ budget to accommodate the bulky parent docs and neighbors
-    safe_context = build_safe_context(expanded_docs, max_tokens=5000)
+    # Expanded budget to accommodate the bulky parent docs and neighbors
+    safe_context = build_safe_context(expanded_docs, max_tokens=getattr(config, "MAX_SAFE_CONTEXT_TOKENS", 5000))
     references = format_references(safe_context)
 
     return safe_context, expanded_docs, references, retrieved_parents
 
 
-def generate_answer(user_query: str):
-    
-    # Optional: Enable Query Expansion if needed
-    # optimized_query = expand_query(user_query)
-    # safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=optimized_query)
-    
-    safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=user_query)
+def generate_answer(user_query: str, chat_history: Optional[list] = None):
+    """
+    Executes conversational RAG pipeline:
+    1. If chat history exists, optionally condenses follow-up into a standalone retrieval query.
+    2. Retrieves parent documents via Qdrant & cross-encoder reranking.
+    3. Synthesizes an answer strictly grounded in context with [n] citations.
+    """
+    retrieval_query = user_query
+    formatted_history = format_chat_history(chat_history) if chat_history else ""
 
-    formatted_prompt = STRICT_QA_PROMPT.format(
+    # Condense follow-up questions for accurate vector retrieval if chat history exists
+    if formatted_history and CONDENSE_QUESTION_PROMPT is not None:
+        try:
+            condense_chain = CONDENSE_QUESTION_PROMPT | llm
+            condensed = condense_chain.invoke({
+                "chat_history": formatted_history,
+                "question": user_query
+            })
+            condensed_text = (condensed.content if hasattr(condensed, "content") else str(condensed)).strip()
+            if condensed_text and len(condensed_text) > 4 and not condensed_text.startswith("Error"):
+                retrieval_query = condensed_text
+                print(f"[CONVERSATIONAL RAG] Reformulated search query: {retrieval_query}")
+        except Exception as e:
+            print(f"[WARNING] Conversational query condensation skipped: {e}")
+            retrieval_query = user_query
+
+    safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=retrieval_query)
+
+    if formatted_history:
+        formatted_prompt = CONVERSATIONAL_QA_PROMPT.format(
+            context=safe_context,
+            chat_history=formatted_history,
+            question=user_query
+        )
+    else:
+        formatted_prompt = STRICT_QA_PROMPT.format(
             context=safe_context,
             question=user_query
         )
@@ -300,6 +335,7 @@ def generate_answer(user_query: str):
     print("\n[ANSWER]\n", answer_text)
 
     return answer_text, safe_context, expanded_docs, references, retrieved_parents
+
 
 
 # ==============================================================================

@@ -4,7 +4,10 @@ import pymupdf
 import warnings
 import re
 
-from pdf_image_rendering import compute_image_hash
+try:
+    from .pdf_image_rendering import compute_image_hash
+except ImportError:
+    from pdf_image_rendering import compute_image_hash
 
 
 # ==========================================

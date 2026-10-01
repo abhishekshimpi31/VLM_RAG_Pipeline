@@ -3,6 +3,7 @@ import types
 import json
 import math
 import re
+import os
 import pandas as pd
 from tqdm import tqdm
 
@@ -25,18 +26,19 @@ from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 
 # Production inference & vector store components
-from inference import generate_answer
-from chunking_vectordb import embedding_model
+from ..retrieval.inference import generate_answer
+from ..indexing.chunking_vectordb import embedding_model
+import config
 
 # ==============================================================================
 # 1. CONFIGURATION
 # ==============================================================================
-GROUND_TRUTH_PATH = "data/extracted_data/testing_data/ground_truth_dataset.json"
-OUTPUT_CSV = "data/extracted_data/testing_data/evaluation_results.csv"
+GROUND_TRUTH_PATH = getattr(config, "GROUND_TRUTH_DATASET_PATH", "data/extracted_data/testing_data/ground_truth_dataset.json")
+OUTPUT_CSV = getattr(config, "EVALUATION_RESULTS_OUTPUT_CSV", "data/extracted_data/testing_data/evaluation_results.csv")
 MAX_TEST_SAMPLES = None  # Set to an integer (e.g. 18) or None to evaluate all
 
 # Judge models
-llm = ChatOllama(model="llama3", temperature=0.0, num_ctx=6000, format="json")
+llm = ChatOllama(model=getattr(config, "LLM_MODEL_NAME", "llama3"), temperature=0.0, num_ctx=6000, format="json")
 ragas_llm = LangchainLLMWrapper(llm)
 ragas_embed = LangchainEmbeddingsWrapper(embedding_model)
 
@@ -110,6 +112,10 @@ def compute_ir_metrics(relevance: list[int]) -> dict:
 # ==============================================================================
 def run_evaluation():
     print(f"\n[1/3] Loading Ground Truth: '{GROUND_TRUTH_PATH}'...")
+    if not os.path.exists(GROUND_TRUTH_PATH):
+        print(f"[ERROR] Ground truth file not found at: {GROUND_TRUTH_PATH}")
+        return
+
     with open(GROUND_TRUTH_PATH, "r", encoding="utf-8") as f:
         ground_truth_records = json.load(f)
 
@@ -129,12 +135,6 @@ def run_evaluation():
         # Execute generation pipeline
         answer, safe_context, docs, references, retrieved_parents = generate_answer(q)
 
-        # print("safe_context", safe_context)
-
-        # # Parse context fed to the generator
-        # safe_context_split = re.split(r'--- Document \d+ ---', safe_context)
-        # safe_context_list = [c.strip() for c in safe_context_split if c.strip()]
-
         try:
             parsed_context = json.loads(safe_context)
             # Extract ONLY the text content for IR metrics and Ragas
@@ -142,8 +142,6 @@ def run_evaluation():
         except json.JSONDecodeError:
             print(f"[ERROR] Failed to parse safe_context JSON for query: {q}")
             safe_context_list = []
-
-        # print("safe_context_list", safe_context_list)
 
         # 1. Deterministic IR Metrics
         relevance_list = determine_relevance(safe_context_list, target_id, ref_context, docs)
@@ -175,10 +173,10 @@ def run_evaluation():
     print("\n[3/3] Running Ragas LLM-as-a-Judge...")
 
     custom_run_config = RunConfig(
-    timeout=600,       # Wait up to 10 minutes for Ollama to respond
-    max_workers=1,     # Do not send concurrent requests
-    max_retries=2      # Retry if a request fails
-)
+        timeout=600,       # Wait up to 10 minutes for Ollama to respond
+        max_workers=1,     # Do not send concurrent requests
+        max_retries=2      # Retry if a request fails
+    )
 
     judge_results = evaluate(
         dataset=eval_dataset,
@@ -210,6 +208,7 @@ def run_evaluation():
     print(f"Context Precision: {df_results['context_precision'].mean():.4f}")
     print("=" * 60)
 
+    os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
     df_results.to_csv(OUTPUT_CSV, index=False)
     print(f"\n[SUCCESS] Detailed evaluation results saved to '{OUTPUT_CSV}'.")
 

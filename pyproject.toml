@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ipcc-scientific-rag"
+version = "1.0.0"
+description = "Industrial-grade scientific RAG pipeline for IPCC climate reports with AST splitting and multi-modal VLM hydration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "IPCC RAG Engineering Team" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "tqdm>=4.66.0",
+    "pandas>=2.0.0",
+    "pymupdf>=1.24.0",
+    "pymupdf4llm>=0.0.14",
+    "Pillow>=10.0.0",
+    "imagehash>=4.3.1",
+    "torch>=2.2.0",
+    "transformers>=4.44.0",
+    "accelerate>=0.33.0",
+    "bitsandbytes>=0.43.0",
+    "qwen-vl-utils>=0.0.8",
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-text-splitters>=0.3.0",
+    "langchain-huggingface>=0.1.0",
+    "langchain-ollama>=0.2.0",
+    "langchain-qdrant>=0.1.4",
+    "langchain-classic>=0.0.1",
+    "qdrant-client>=1.11.0",
+    "fastembed>=0.3.4",
+    "FlagEmbedding>=1.2.10",
+    "ragas>=0.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "gradio>=4.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "streamlit>=1.35.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "config*"]

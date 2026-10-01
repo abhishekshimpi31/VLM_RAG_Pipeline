@@ -3,9 +3,14 @@ import re
 import json
 import glob
 
-from file_versioning import get_latest_file
+try:
+    from ..common.file_versioning import get_latest_file
+    import config
+except ImportError:
+    from file_versioning import get_latest_file
+    import config
 
-def hydrate_markdown_files(base_dir: str = "pipeline_data"):
+def hydrate_markdown_files(base_dir: str = "data/extracted_data/"):
     for chapter_folder in os.listdir(base_dir):
         chapter_path = os.path.join(base_dir, chapter_folder)
         if not os.path.isdir(chapter_path): continue
@@ -62,5 +67,5 @@ def hydrate_markdown_files(base_dir: str = "pipeline_data"):
             print(f"[✔] Hydrated: {os.path.basename(output_md)}")
 
 if __name__ == "__main__":
-    base_directory = "data/extracted_data/"
+    base_directory = str(getattr(config, "EXTRACTED_DATA_DIR", "data/extracted_data/"))
     hydrate_markdown_files(base_directory)

@@ -1,65 +1,238 @@
-IPCC Scientific RAG Pipeline An industrial-grade Retrieval-Augmented Generation (RAG) pipeline engineered specifically for highly structured, dense scientific literature—specifically the IPCC climate reports.Unlike standard RAG tutorials that use naive semantic splitting, this architecture guarantees mathematical retrieval precision, hierarchical traceability, and LLM context safety by combining LangChain's ParentDocumentRetriever with dynamic forward-expansion and strict token budgeting.
+# IPCC Scientific RAG Pipeline
 
-Architecture & Key Innovation
+An industrial-grade Retrieval-Augmented Generation (RAG) pipeline engineered specifically for highly structured, dense scientific literature—specifically the **IPCC Climate Assessment Reports**.
 
-1. 5-Tier AST (Abstract Syntax Tree) SplittingStandard chunking destroys scientific context. This pipeline parses documents based on their native Markdown headers (from # Chapter down to ##### Subsubsubection). The LLM receives text grounded in its exact location in the book, allowing for highly accurate citations.
+Unlike standard RAG pipelines that use naive semantic or fixed-character splitting, this architecture guarantees mathematical retrieval precision, hierarchical traceability, and LLM context safety by combining LangChain's `ParentDocumentRetriever` with dynamic forward-expansion, multi-modal figure hydration, and strict token budgeting.
 
-2. Parent-Child Retrieval StrategyChild Chunks (200 tokens): Highly granular vectors optimized for dense mathematical and semantic search.Parent Documents (1,000+ tokens): The full narrative section containing the child chunk is passed to the LLM to provide surrounding scientific context.
+---
 
-3. Dynamic Forward Context ExpansionScientific concepts often span multiple paragraphs. If the retrieved Parent Document is below a safe token threshold, the pipeline automatically traverses the local docstore and chains subsequent sections forward until the LLM has enough context to answer accurately—without fetching irrelevant preceding summaries.
+## 🏛️ System Architecture
 
-4. Asymmetric Scientific EmbeddingsPowered by BAAI/bge-large-en-v1.
+```
+                    ┌──────────────────────────────────────────────┐
+                    │          IPCC PDF Assessment Reports         │
+                    └──────────────────────┬───────────────────────┘
+                                           │
+                        [PyMuPDF & PyMuPDF4LLM Extraction]
+                                           │
+             ┌─────────────────────────────┴─────────────────────────────┐
+             ▼                                                           ▼
+   [Figure / Image Detection]                                   [Section AST Parser]
+             │                                                           │
+   [Qwen2-VL-7B Ingestion]                                                │
+   (Extract axes, units, trends)                                         │
+             │                                                           │
+             ▼                                                           │
+   [JSON Chapter Registry]                                               │
+             │                                                           │
+             └─────────────────────────────┬─────────────────────────────┘
+                                           ▼
+                            [Markdown Hydration Stage]
+                      (Injects structured visual blockquotes)
+                                           │
+                                           ▼
+                           [5-Tier Markdown AST Splitter]
+                              (# Chapter down to ######)
+                                           │
+                                           ▼
+                      [Parent Size Capper (1500 tokens)]
+                                           │
+                 ┌─────────────────────────┴─────────────────────────┐
+                 ▼                                                   ▼
+     [Child Splitter (400 tok)]                         [Parent Docs LocalFileStore]
+                 │                                                   │
+                 ▼                                                   │
+     [Qdrant Hybrid Vector Store]                                    │
+     (Dense BGE + Sparse BM25)                                       │
+                 │                                                   │
+                 │ ◄────── User Query (Asymmetric BGE) ──────────────┤
+                 ▼                                                   │
+     [Top-K Child Candidates]                                        │
+                 │                                                   │
+                 ▼                                                   │
+     [BGE Cross-Encoder Reranker]                                     │
+                 │                                                   │
+                 ▼                                                   ▼
+     [Deduplicated Parent Lookup] ──────────────────────► [Fetch from Docstore]
+                                                                     │
+                                                                     ▼
+                                                         [Dynamic Forward Expansion]
+                                                         (Chains neighbor sections)
+                                                                     │
+                                                                     ▼
+                                                          [LLaMA Token Budgeting]
+                                                          (Strict <=5000 tokens)
+                                                                     │
+                                                                     ▼
+                                                          [Grounded Prompt Synthesis]
+                                                          (Zero outside knowledge)
+                                                                     │
+                                                                     ▼
+                                                          [Ollama LLaMA-3.1 Answer]
+```
 
-5. The pipeline applies asymmetric instruction-tuning, embedding the IPCC documents densely while prepending "Represent this sentence for searching relevant passages: " to user queries at inference time.5. Strict Token BudgetingModern LLMs suffer from the "Lost in the Middle" effect when fed too much context. This pipeline dynamically measures exact tokens using the hf-internal-testing/llama-tokenizer and enforces a strict budget (e.g., 3,000 tokens) to guarantee zero hallucinations and fast inference times. 
+---
 
-Tech Stack
+## 📁 Project Directory Structure
 
-ComponentTechnologyVector DatabaseQdrant (Local, Disk-Optimized via on_disk_payload)Embedding ModelHuggingFace (BAAI/bge-large-en-v1.5)LLM EngineOllama (Llama-2 / Llama-3)OrchestrationLangChain / LangChain-QdrantStorageLocalFileStore (Parent Docs) 
+```plaintext
+Rag_Pipeline/
+├── config.py                          # Centralized dynamic configuration & prompts
+├── pyproject.toml                     # Python packaging specification
+├── requirements.txt                   # Complete production dependencies
+├── .env.example                       # Environment variables template
+├── .gitignore                         # Version control exclusions
+│
+├── src/                               # Modular Source Package
+│   ├── common/                        # Shared file utilities & hashing
+│   │   ├── __init__.py
+│   │   └── file_versioning.py         # File hashing, TTL retention, safe chapter IDs
+│   ├── ingestion/                     # Multi-modal extraction & Markdown hydration
+│   │   ├── __init__.py
+│   │   ├── pdf_image_rendering.py     # Snapshot rendering, dHash fingerprinting, caption regex
+│   │   ├── context_generator.py       # Visual queueing, caching & orphan cleanup
+│   │   ├── manifest_mdfile_generation.py # AST document parsing & manifest generation
+│   │   ├── vlm_model.py               # Qwen2-VL-7B 8-bit multi-modal extraction
+│   │   └── image_context_ingestion.py # In-place Markdown blockquote hydration
+│   ├── indexing/                      # Chunking, embeddings & vector store
+│   │   ├── __init__.py
+│   │   ├── dynamic_splitter.py        # Tokenizer math & dynamic forward neighbor expansion
+│   │   └── chunking_vectordb.py       # AST splitters, Qdrant hybrid setup, batched ingestion
+│   ├── retrieval/                     # Search, reranking & LLM generation
+│   │   ├── __init__.py
+│   │   └── inference.py               # Child reranker, safe token budgeting, grounded QA
+│   └── evaluation/                    # Benchmarking & automated metrics
+│       ├── __init__.py
+│       ├── generate_ground_truth.py   # Synthetic QA & retrieval dataset generator
+│       ├── evaluate_retrieval.py      # Deterministic IR metrics (MRR, NDCG, Precision, HitRate)
+│       └── evaluate_pipeline.py       # End-to-end evaluation with Ragas & LLM-as-a-judge
+│
+├── scripts/                           # Production CLI Executables
+│   ├── run_ingestion.py               # Batch-embeds and indexes documents into Qdrant
+│   ├── run_inference.py               # Command-line query inference runner
+│   ├── run_vlm.py                     # Runs Qwen2-VL on pending image manifests
+│   ├── run_hydration.py               # Hydrates raw Markdown with VLM figure analyses
+│   ├── run_retrieval_benchmark.py     # Executes deterministic IR benchmark evaluation
+│   └── run_pipeline_eval.py           # Runs complete Ragas evaluation suite
+│
+├── tests/                             # Unit & Sanity Test Suite
+│   ├── __init__.py
+│   └── test_sanity.py
+│
+├── data/                              # Data directories (PDFs, extracted markdown, testing datasets)
+└── vector_database/                   # Local persistent Qdrant & docstore storage
+```
 
-Project StructurePlaintext├── data/
-│   └── extracted_data/
-│       └── chapter_3/
-│           └── md/
-│               └── *_hydrated.md      # Markdown files with VLM-extracted figures injected
-├── vector_database/
-│   ├── quadrant_database/
-│   │   ├── qdrant_db/                 # Qdrant disk storage
-│   │   └── docstore/                  # LocalFileStore bytes (Parent Docs)
-├── chunking_vectordb.py               # Ingestion, AST splitting, and Vectorization logic
-├── inference.py                       # Retrieval, Dynamic Expansion, Router, and LLM generation
-├── dynamic_splitter.py                # Custom expansion and token math logic
-├── file_versioning.py                 # File hashing for incremental updates
-└── README.md
+---
 
+## 🚀 Key Features
 
-Installation & Setup
+1. **5-Tier AST (Abstract Syntax Tree) Splitting**:
+   Parses documents according to native Markdown headers (from `# Chapter` down to `###### Subsubsubsubection`), preserving exact hierarchical document context and citation breadcrumbs.
+2. **Parent-Child Retrieval Strategy**:
+   * **Child Chunks (~400 tokens)**: Granular vectors optimized for dense mathematical and sparse keyword search.
+   * **Parent Documents (~1,500 tokens)**: Full narrative sections containing child chunks are fetched from `LocalFileStore` to provide comprehensive context to the LLM.
+3. **Multi-Modal Visual Data Hydration**:
+   Renders PDF page graphics, hashes them via perceptual `dHash`, and uses `Qwen2-VL-7B` to extract axes, units, legends, and quantitative trends. The extracted analysis is injected directly into the document Markdown as analytical blockquotes.
+4. **Hybrid Dense + Sparse Vector Search**:
+   Combines dense semantic representations (`BAAI/bge-large-en-v1.5`) with sparse BM25 (`FastEmbedSparse`) in Qdrant, ensuring that both high-level concepts and exact scientific acronyms/IDs are retrievable.
+5. **Dynamic Forward Context Expansion**:
+   If a retrieved parent document falls below a minimum token threshold, the pipeline automatically traverses the local docstore along `next_id` linked-list chains, appending forward neighbor sections without grabbing irrelevant preceding text.
+6. **BGE Cross-Encoder Reranking**:
+   Employs `BAAI/bge-reranker-large` over retrieved child chunks, deduplicating to the most relevant parent documents and avoiding cross-encoder token truncation.
+7. **Strict Token Budgeting & Grounded Synthesis**:
+   Enforces a strict token ceiling using the LLaMA tokenizer to avoid LLM "lost-in-the-middle" degradation, paired with a prompt requiring 100% factual grounding and bracketed `[index]` citations.
 
-1. PrerequisitesPython 3.10+Ollama installed and running locally.
+---
 
-2. Install DependenciesBashpip install -r requirements.txt
-(Ensure you have langchain, langchain-qdrant, langchain-huggingface, qdrant-client, and transformers installed).
+## 🛠️ Installation & Setup
 
-3. Pull the Local LLMBashollama pull llama2
+### 1. Prerequisites
+* Python 3.10+
+* [Ollama](https://ollama.ai/) installed and running locally
+* CUDA-capable GPU (recommended for local VLM / embedding acceleration)
 
-Usage 
+### 2. Pull Local LLM Model
+```bash
+ollama pull llama3.1
+```
 
-Phase 1: IngestionRun the pipeline script with the ingestion function enabled to process your hydrated Markdown files, generate the 1024-dimensional vectors, and store the parent documents.The ingestion script is idempotent. It hashes files and safely deletes old vectors before replacing them, meaning you can run it incrementally without corrupting the database.Bashpython chunking_vectordb.py
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+Or install in editable package mode:
+```bash
+pip install -e .
+```
 
-Phase 2: InferenceRun the inference script to test the pipeline. The script features a lightweight semantic router that automatically bypasses vector search for global queries (e.g., "List all figures") and routes standard scientific questions through the Qdrant + Dynamic Expansion flow.Bashpython inference.py
+### 4. Configure Environment
+Copy `.env.example` to `.env` to customize model names or directory paths:
+```bash
+cp .env.example .env
+```
 
-Example Output:Plaintext[USER]: What is the Human Influence on the Cryosphere?
+---
 
-[INFO] Retrieving top parent documents from Qdrant...
-       -> [EXPANDING FORWARD] Chunk 'a1b2c3d4_0014' (350 tokens)...
-          [+] Appended 'a1b2c3d4_0015'. Total size: 850 tokens.
-          [+] Appended 'a1b2c3d4_0016'. Total size: 1200 tokens.
+## 💻 Usage & Execution
 
-[INFO] Calculating Context Tokens...
-       -> Document 1: 1200 tokens
-       -> [ADDED] Document 1: 1200 tokens
-[INFO] Final Context Size: 1200/3000 tokens.
+### Phase 1: Ingestion & Vectorization
+Process hydrated Markdown files, generate dense & sparse vectors, and index parent documents:
+```bash
+python scripts/run_ingestion.py
+```
 
-[INFO] Generating response with Llama-2...
+### Phase 2: QA Inference & Interactive Chatbot
+#### 1. CLI Inference
+Query the scientific literature directly from the terminal:
+```bash
+python scripts/run_inference.py --query "What is the likely range of human-induced warming?"
+```
 
---- FINAL ANSWER ---
-Based on Document 1 (Section 3.4 - Cryosphere), human influence has very likely contributed to the melting of glaciers and decreases in Arctic sea ice since the late 20th century...
+#### 2. FastAPI Backend Service
+Launch the RESTful API with automated Swagger docs:
+```bash
+python scripts/run_api.py
+# API is accessible at: http://localhost:8000
+# Interactive Swagger Documentation: http://localhost:8000/docs
+```
+
+#### 3. Streamlit Chatbot Interface
+Launch the multi-modal scientific assistant UI:
+```bash
+python scripts/run_ui.py
+# Streamlit UI opens at: http://localhost:8501
+```
+
+### Phase 3: Multi-Modal Figure Extraction (Optional / Advanced)
+1. **Extract figures and create manifests**:
+   ```bash
+   python scripts/run_ingestion.py
+   ```
+2. **Run VLM inference**:
+   ```bash
+   python scripts/run_vlm.py --batch-size 8
+   ```
+3. **Hydrate Markdown with figure data**:
+   ```bash
+   python scripts/run_hydration.py
+   ```
+
+### Phase 4: Evaluation & Benchmarking
+* **Evaluate Retrieval (Deterministic IR Metrics - MRR, NDCG, HitRate)**:
+  ```bash
+  python scripts/run_retrieval_benchmark.py
+  ```
+* **Evaluate End-to-End Pipeline (RAGAS - Faithfulness, Relevancy)**:
+  ```bash
+  python scripts/run_pipeline_eval.py
+  ```
+
+---
+
+## 🧪 Running Tests
+
+Run the test suite to verify pipeline utilities, config loading, FastAPI endpoints, and metric computations:
+```bash
+python -m unittest tests/test_sanity.py
+```

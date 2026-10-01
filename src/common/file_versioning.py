@@ -73,7 +73,6 @@ def get_file_hash(filepath: str) -> str:
         hasher.update(f.read())
     return hasher.hexdigest()
 
-
 def enforce_retention_policy(directory: str, days: int = 30) -> int:
     """Deletes files in a directory older than the specified retention period."""
     if not os.path.exists(directory):
