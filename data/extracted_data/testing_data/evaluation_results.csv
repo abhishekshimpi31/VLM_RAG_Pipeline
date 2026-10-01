@@ -1,0 +1,147 @@
+question,ground_truth,answer,num_chunks_retrieved,relevance_vector,precision_at_k,recall_at_k,mrr_at_k,ndcg_at_k,faithfulness,answer_relevancy,context_recall,context_precision
+What is the relative contribution of different forcing scenarios to the increase in temperature anomaly globally and regionally?,"The anthropogenic + natural scenario shows the highest increase in temperature anomaly, followed by the natural-only and greenhouse gas only scenarios, while the aerosol only scenario shows a decrease.","Here is the synthesized answer based on the provided context:
+
+The anthropogenic + natural scenario shows the highest increase in temperature anomaly globally and regionally, followed by the natural-only and greenhouse gas only scenarios [2]. The aerosol only scenario shows a decrease in temperature anomaly globally and regionally [2].
+
+In terms of specific regions, the anthropogenic + natural scenario shows a significant increase in temperature anomaly in:
+
+* Global Land (c) [1]
+* North America (d) [1]
+* Europe and North Africa (f) [1]
+* Asia (h) [1]
+* Antarctica (j) [1]
+
+The natural-only scenario shows a smaller increase in temperature anomaly in these regions [1].
+
+The greenhouse gas only scenario shows a slight increase in temperature anomaly in these regions [1].
+
+The aerosol only scenario shows a decrease in temperature anomaly in these regions [1].
+
+It is worth noting that the context does not provide a quantitative breakdown of the relative contributions of different forcing scenarios to the increase in temperature anomaly globally and regionally.
+
+References:
+
+[1] Document 1, Section ""Quantitative Data & Trends:""
+[2] Document 2, Section ""Multi-panel Breakdown:""",2,"[1, 1]",1.0,1.0,1.0,1.0,0.9166666666666666,0.871742859464386,1.0,0.99999999995
+What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850–1900?,-0.2°C to +0.2°C,"The likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850–1900 is -0.2°C to +0.2°C [1].
+
+This range is based on the assessment in the provided text, which states: ""Based on these studies, but allowing for unsampled sources of error, we assess the likely range of the contribution of internal variability to GSAT warming between 2010–2019 and 1850–1900 to be -0.2°C to +0.2°C"" [1].
+
+Note that this answer is based solely on the provided text and does not include any external knowledge or assumptions.",2,"[1, 0]",0.5,1.0,1.0,1.0,0.6,0.9825590558033749,1.0,0.9999999999
+What is the best estimate of the anthropogenic attributable warming rate in degrees Celsius per decade for the period 2010–2019?,0.2°C per decade,"The best estimate of the anthropogenic attributable warming rate in degrees Celsius per decade for the period 2010–2019 is 0.2°C per decade [1].
+
+This estimate is based on the assessment in Table 3.1, which lists the estimates of warming in GSAT attributable to human influence for different periods in °C, all relative to the 1850–1900 base period [2]. The assessment in Table 3.1 is based on the methods described in the three studies indicated, but applied to additional periods and the warming trend [2].
+
+Note that the question specifically asks for the best estimate of the anthropogenic attributable warming rate, which is stated to be 0.2°C per decade in the context [1].",2,"[1, 1]",1.0,1.0,1.0,1.0,0.6,0.9769273234982436,1.0,0.99999999995
+What percentage of the total energy accumulated in the climate system is attributed to anthropogenic greenhouse gas forcing for ocean warming since the 1970s?,"Anthropogenic greenhouse gas forcing is the primary driver of ocean warming, accounting for over 90% of total energy accumulated in the climate system.","I do not have enough information in the provided context to answer this question.
+
+However, I can provide some related information. The text states that the ocean accounted for more than 90% of the Earth's energy change since the 1970s (Rhein et al., [1]; Bindoff et al., [2]). It also mentions that 91% of the observed change in Earth's total energy from 1971 to 2018 was stored in the ocean (von Schuckmann et al., [3]). However, it does not provide information on the percentage attributed to anthropogenic greenhouse gas forcing for ocean warming since the 1970s.",2,"[0, 0]",0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.99999999995
+What is the main driver of the warming of the troposphere since 1979 according to the latest studies?,"Anthropogenic forcing, dominated by greenhouse gases, was the main driver of the warming of the troposphere since 1979.","According to the latest studies, it is very likely that anthropogenic forcing, dominated by greenhouse gases, was the main driver of the warming of the troposphere since 1979 [1]. This conclusion is supported by studies that have found that CMIP5 and CMIP6 model simulations warm more than observations in the tropical mid- and upper-troposphere over the 1979–2014 period [2, 3, 4, 5, 6]. Additionally, studies have shown that overestimated surface warming is partially responsible for the discrepancy between models and observations [7, 8]. Furthermore, Mitchell et al. (2020) used CMIP6 models to find that the main driver of tropospheric temperature changes is greenhouse gases [9]. Therefore, it is very likely that human activities, specifically the increase in greenhouse gases, are the primary cause of the warming of the troposphere since 1979 [1].
+
+References:
+[1] Section 3.3.1.2.2, document 1
+[2] Mitchell et al. (2013), [1]
+[3] Santer et al. (2017a), [1]
+[4] Suárez-Gutiérrez et al. (2017), [1]
+[5] McKitrick and Christy (2018), [1]
+[6] Po-Chedley et al. (2021), [1]
+[7] Mitchell et al. (2013), [1]
+[8] Pallotta and Santer (2020), [1]
+[9] Mitchell et al. (2020), [2]",2,"[1, 0]",0.5,1.0,1.0,1.0,1.0,0.8661774195671462,1.0,0.99999999995
+"What is the observed trend in global ocean heat content during the period of slowed surface warming from 1998 to 2012, and how does it compare to model simulations?","Global ocean heat content continued to increase during the period of slowed surface warming from 1998 to 2012, at a rate consistent with CMIP5 and CMIP6 historical simulations.","I do not have enough information in the provided context to answer the question about the observed trend in global ocean heat content during the period of slowed surface warming from 1998 to 2012. However, I can provide information about the observed trend in global ocean heat content during the period of 1971 to 2018, as stated in the second document:
+
+""The AR5 and SROCC assessed that the ocean accounted for more than 90% of the Earth's energy change since the 1970s (Rhein et al., [2]; Bindoff et al., [3]). These assessments are consistent with recent studies assessed in Section 7.2 and Cross-Chapter Box 9.1, which find that 91% of the observed change in Earth's total energy from 1971 to 2018 was stored in the ocean (von Schuckmann et al., [4]).""
+
+Regarding the comparison between observed and simulated global ocean heat content, the second document states:
+
+""Figure 3.26 | Global ocean heat content in CMIP6 simulations and observations. Time series of observed (black) and simulated (red) global ocean heat content anomalies with respect to 1995–2014 for the full ocean depth (left-hand panel); upper layer: 0–700 m (top right-hand panel); intermediate layer: 700–2000 m (middle right-hand panel); and the abyssal ocean: >2000 m (bottom right-hand panel).""
+
+However, this figure does not specifically address the period of slowed surface warming from 1998 to 2012.",2,"[0, 0]",0.0,0.0,0.0,0.0,0.6,0.0,1.0,0.99999999995
+What is the primary driver of the observed increase in global land precipitation since the mid-20th century?,"It is likely that human influence, in particular due to greenhouse gas forcing, is the main driver of the observed increase in global land precipitation during recent decades.","It is likely that human influence, in particular due to greenhouse gas forcing, is the main driver of the observed intensification of heavy precipitation in global land regions during recent decades [2].",2,"[0, 0]",0.0,0.0,0.0,0.0,1.0,0.8560365091291207,1.0,0.49999999995
+What is the attributed cause for the observed decline in Arctic sea ice extent since 1979 according to the AR5 report?,Anthropogenic forcings are very likely to have contributed to Arctic sea ice loss since 1979.,"According to the AR5 report, anthropogenic forcings are very likely to have contributed to Arctic sea ice loss since 1979 [1]. This conclusion is based on studies showing that models can reproduce the observed decline only when including anthropogenic forcings, and formal attribution studies [1].
+
+[1] Bindoff et al. (2013)",2,"[0, 1]",0.5,1.0,0.5,0.6309,1.0,0.9290353408858351,1.0,0.99999999995
+What is the primary driver of Arctic sea ice loss according to recent attribution studies?,Anthropogenic forcing mainly due to greenhouse gas increases was the main driver of Arctic sea ice loss since 1979.,"Based on the provided context, the primary driver of Arctic sea ice loss is anthropogenic forcing, mainly due to greenhouse gas increases, with very likely attribution since the late 1970s [1]. 
+
+Increases in anthropogenic aerosols have offset part of the greenhouse gas-induced Arctic sea ice loss since the 1950s, with medium confidence [1].
+
+Recent attribution studies, including those by Zhang and Knutson (2013) and Kirchmeier-Young et al. (2017), have found that the observed 2012 record low in September Arctic SIE is inconsistent with internal climate variability alone, and that the observed 2012 SIE minimum cannot be reproduced in a simulation excluding human influence [1].
+
+Therefore, it is very likely that anthropogenic forcing was the main driver of Arctic sea ice loss since the late 1970s [1].
+
+References:
+[1] Document 1, Section 3.4.1.1.",2,"[1, 0]",0.5,1.0,1.0,1.0,1.0,0.9120999246438156,1.0,0.99999999995
+How does CMIP5 and CMIP6 models compare in simulating Antarctic sea ice loss over the satellite era since 1979?,"CMIP5 climate models generally simulate Antarctic sea ice loss over the satellite era since 1979, in contrast to the observed change, and CMIP6 models also simulate Antarctic ice loss.","CMIP5 climate models generally simulate Antarctic sea ice loss over the satellite era since 1979 [1] in contrast to the observed change, and CMIP6 models also simulate Antarctic ice loss [2] (Figure 3.20 and 3.21) [3].
+
+There is a discrepancy between the simulated and observed changes, which may be in part due to the role of internal variability in the observed change [4]. However, when the spatial pattern is considered, trends in the summer and autumn (from 1979–2005) appear outside the range of internal variability [5].
+
+This suggests that the models may exhibit an unrealistic simulation of the Antarctic sea ice forced response or the internal variability of the system [6]. Discrepancies among the models in simulated sea ice variability [7], the sea ice climatological state [8], upper ocean temperature trends [9], Southern Hemisphere westerly wind trends [10], or the sea ice response to Southern Annular Mode variations [11] may all play some role in explaining these differences with the observed trends.
+
+References:
+
+[1] Mahlstein et al., 2013
+[2] Roach et al., 2020
+[3] Figure 3.20 and 3.21
+[4] Mahlstein et al., 2013; Polvani and Smith, 2013; Zunz et al., 2013; Meehl et al., 2016c; Turner et al., 2016
+[5] Hobbs et al., 2015
+[6] Mahlstein et al., 2013; Polvani and Smith, 2013; Zunz et al., 2013; Meehl et al., 2016c; Turner et al., 2016
+[7] Zunz et al., 2013
+[8] Roach et al., 2018
+[9] Schneider and Deser, 2018
+[10] Purich et al., 2016
+[11] Ferreira et al., 2014; Holland et al., 2017; Kostov et al., 2017; Landrum et al., 2017",2,"[1, 1]",1.0,1.0,1.0,1.0,0.9166666666666666,0.7122866205037651,1.0,0.49999999995
+What trend does the observational data show for Arctic Sea Ice Area from the 1980s to the 2010s?,There is a general decrease in Arctic Sea Ice Area from the 1980s to the 2010s.,The observational data shows a general decrease in Arctic Sea Ice Area from the 1980s to the 2010s [1].,3,"[1, 1, 0]",0.6667,1.0,1.0,1.0,1.0,0.9430429931121872,1.0,0.9999999999
+How do historical simulations compare to observations in terms of the trend of Antarctic Sea Ice Area from the 1980s to the 2010s?,"Historical simulations exhibit similar trends to observations in terms of Antarctic Sea Ice Area, showing a general increase from the 1980s to the 2010s with more variability.","Historical simulations exhibit similar trends to observations in terms of the trend of Antarctic Sea Ice Area from the 1980s to the 2010s, but with more variability [1]. Observations show a general increase in SIA from the 1980s to the 2010s, with a notable decrease in the 2000s [1]. Natural only simulations show a less pronounced increase compared to the observations [1].
+
+In the period from 1979 to 2015, the observed increase in Antarctic sea ice extent is not generally captured by global climate models, and there is low confidence in attributing the causes of the change [2]. However, historical simulations do show a small increase in summer and winter over the 1979-2017 period, but these changes are not statistically significant [3].
+
+It is worth noting that the short period of comprehensive satellite observations, beginning in 1979, makes it challenging to set the observed increase between 1979 and 2015, or the subsequent decrease, in a long-term context [2].
+
+References:
+
+[1] Document Index 1
+[2] Document Index 2
+[3] Document Index 3",3,"[1, 1, 1]",1.0,1.0,1.0,1.0,0.9090909090909091,0.851730372296197,1.0,0.99999999995
+What is the primary driver of the observed reduction in Northern Hemisphere spring snow cover since 1950 according to the IPCC assessment?,"Human influence is very likely the main driver of the near-universal retreat of glaciers globally since the 1990s, and it is very likely that human influence has contributed to the observed surface melting of the Greenland Ice Sheet over the past two decades.",It is very likely that anthropogenic influence contributed to the observed reductions in Northern Hemisphere springtime snow cover since 1950 [2].,2,"[0, 1]",0.5,1.0,0.5,0.6309,1.0,0.8774649037400599,0.5,0.49999999995
+What percentage of the observed glacier mass loss since 1850 is attributed to anthropogenic influence according to the analysis by Roe et al. (2021)?,At least 85% of cumulative glacier mass loss since 1850 is attributable to anthropogenic influence.,"According to Roe et al. (2021), at least 85% of cumulative glacier mass loss since 1850 is attributable to anthropogenic influence [1].
+
+Note: This answer is based solely on the provided context and does not include any external knowledge or assumptions.",2,"[0, 0]",0.0,0.0,0.0,0.0,0.5,0.835375767482946,1.0,0.9999999999
+"What is the magnitude of the deep ocean warm bias in CMIP6 compared to CMIP5, and in which ocean basins is this bias most prominent?","The deep ocean warm bias in CMIP6 is about double the magnitude of the equivalent CMIP5 multi-model mean bias, a feature which is particularly prominent in the Atlantic and southern Indian Ocean.",The magnitude of the deep ocean warm bias in CMIP6 compared to CMIP5 is approaching double the magnitude (about 0.5°C) of the equivalent CMIP5 multi-model mean bias [2]. This bias is most prominent in the Atlantic and southern Indian Oceans [2].,2,"[1, 1]",1.0,1.0,1.0,1.0,0.4,0.9491068464363877,1.0,0.9999999999
+What is the attributed cause for the observed increase in global ocean heat content since the 1970s?,"Anthropogenic greenhouse gas forcing is the primary driver of ocean warming, accounting for over 90% of total energy accumulated in the climate system.","It is extremely likely that human influence was the main driver of the ocean heat content increase observed since the 1970s, which extends into the deeper ocean (very high confidence) [1]. Updated observations, like model simulations, show that warming extends throughout the entire water column (high confidence) [1].
+
+Note: The citations are based on the provided context, specifically the document with document_index = 1.
+
+References:
+[1] Document with document_index = 1.",2,"[1, 0]",0.5,1.0,1.0,1.0,1.0,0.9257346323025896,1.0,0.99999999995
+What evidence supports the conclusion that human activities are the dominant cause of recent climate change?,"Multiple lines of evidence demonstrate that human drivers are the main cause of recent climate change, including the unprecedented rates of increase in greenhouse gas concentrations, the ability of climate models to reproduce observed warming only when including human activities, and the observed patterns of warming that align with the expected effects of human influences.","The evidence supporting the conclusion that human activities are the dominant cause of recent climate change includes:
+
+* Observed increasing greenhouse gas concentrations in the atmosphere [1].
+* Positive radiative forcing [1].
+* Observed warming [1].
+* Physical understanding of the climate system [1].
+* It is virtually certain that internal variability alone could not account for observed warming since 1951 [2].
+* Evidence has grown since AR5 that observed changes since the 1950s in many parts of the climate system are attributable to anthropogenic influence [1].
+* The observed global surface air temperature warming of 0.9°C to 1.2°C in 2010–2019 is much greater than can be explained by internal variability (likely -0.2°C to +0.2°C) or natural forcings (likely -0.1°C to +0.1°C) alone, but consistent with the assessed anthropogenic warming (likely 0.8°C to 1.3°C; Section 3.3.1.1) [1].
+* It is very likely that human influence is the main driver of warming over land (Section 3.3.1.1) [1].
+* The atmosphere as a whole has warmed (Table 7.1) [1].
+* It is very likely that human-induced greenhouse gas increases were the main driver of tropospheric warming since 1979 (Section 3.3.1.2) [1].
+* It is virtually certain that greenhouse gas forcing was the main driver of the observed changes in hot and cold extremes over land at the global scale (Cross-Chapter Box 3.2) [1].
+* Human influence has likely contributed to the observed changes in humidity and precipitation (Section 3.3.2) [1].
+* It is likely that human influence, in particular due to greenhouse gas forcing, is the main driver of the observed intensification of heavy precipitation in global land regions during recent decades (Cross-Chapter Box 3.2) [1].
+* The pattern of ocean salinity changes indicate that fresh regions are becoming fresher and that salty regions are becoming saltier as a result of changes in ocean-atmosphere fluxes through evaporation and precipitation (high confidence) making it extremely likely that human influence has contributed to observed near-surface and subsurface salinity changes since the mid-20th century (Section 3.5.2.2) [1].
+* It is very likely that human influence was the main driver of Arctic sea ice loss since the late 1970s (Section 3.4.1.1) [1].
+* It is very likely that human influence contributed to the observed reductions in Northern Hemisphere springtime snow cover since 1950 (Section 3.4.2) [1].
+* Human influence was very likely the main driver of the recent global, near-universal retreat of glaciers and it is very likely that it contributed to the observed surface melting of the Greenland Ice Sheet over the past two decades (Section 3.4.3.2.1) [1].
+* It is extremely likely that human influence was the main driver of the ocean heat content increase observed since the 1970s (Section 3.5.1.3) [1].
+* It is very likely that human influence was the main driver of the observed GMSL rise since at least 1970 (Section 3.5.3.2) [1].
+
+References:
+
+[1] IPCC (2013) and Bindoff et al. (2013) [1]
+
+[2] Bindoff et al. (2013) [2]
+
+Note: The references are based on the provided context and may not be a comprehensive list of all relevant references.",2,"[0, 0]",0.0,0.0,0.0,0.0,1.0,0.9778514365906535,0.8333333333333334,0.99999999995
+What is the primary cause of observed global surface temperature changes over the past century according to the IPCC assessments?,"Human influence, particularly emissions of greenhouse gases, is the primary cause of observed global surface temperature changes over the past century, accounting for almost all of the warming.","According to the IPCC assessments, the primary cause of observed global surface temperature changes over the past century is human influence [2]. The AR5 concluded that human influence on the climate system is clear (IPCC, 2013), based on observed increasing greenhouse gas concentrations in the atmosphere, positive radiative forcing, observed warming, and physical understanding of the climate system [2]. It is virtually certain that internal variability alone could not account for observed warming since 1951 (Bindoff et al., 2013) [2]. The observed global surface air temperature warming of 0.9°C to 1.2°C in 2010–2019 is much greater than can be explained by internal variability (likely -0.2°C to +0.2°C) or natural forcings (likely -0.1°C to +0.1°C) alone, but consistent with the assessed anthropogenic warming (likely 0.8°C to 1.3°C; Section 3.3.1.1) [2].
+
+Note: The answer is based solely on the provided context and does not include any external knowledge or assumptions.",2,"[1, 0]",0.5,1.0,1.0,1.0,0.9,0.9173144679194095,0.25,0.99999999995

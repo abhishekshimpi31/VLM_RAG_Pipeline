@@ -1,0 +1,1050 @@
+[
+    {
+        "question": "What is the primary driver of the temperature anomaly increase in the Global Ocean (a) scenario?",
+        "target_parent_id": "9de8d8be57d13360_p0039"
+    },
+    {
+        "question": "How does the aerosol only scenario in the North America (d) region show a decrease in temperature anomaly compared to the other scenarios?",
+        "target_parent_id": "9de8d8be57d13360_p0039"
+    },
+    {
+        "question": "What is the approximate rate of warming trend over global land surfaces attributed to anthropogenic forcing, as reported by Chan and Wu (2015)?",
+        "target_parent_id": "9de8d8be57d13360_p0040"
+    },
+    {
+        "question": "According to the text, what is the primary driver of the apparent slowdown in warming over the beginning of the 21st century?",
+        "target_parent_id": "9de8d8be57d13360_p0040"
+    },
+    {
+        "question": "What is the primary driver of GSAT warming between 2010-2019 and 1850-1900, according to the assessment in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0041"
+    },
+    {
+        "question": "What is the likely range of GSAT warming attributable to aerosols, ozone, and land-use change, as assessed in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0041"
+    },
+    {
+        "question": "What is the best estimate of human-induced warming rate given by the IPCC SR1.5 in 2017?",
+        "target_parent_id": "9de8d8be57d13360_p0042"
+    },
+    {
+        "question": "What is the primary reason for the disagreement in anthropogenic attributable warming rate estimates between Gillett et al. (2021) and Ribes et al. (2021)?",
+        "target_parent_id": "9de8d8be57d13360_p0042"
+    },
+    {
+        "question": "What is the primary driver of the warming of the troposphere since 1961, according to the AR5 assessment?",
+        "target_parent_id": "9de8d8be57d13360_p0043"
+    },
+    {
+        "question": "What is the likely contribution of ozone-depleting substances to the cooling of the lower stratosphere since 1979, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0043"
+    },
+    {
+        "question": "According to Flannaghan et al. (2014) and Tuel (2019), what percentage of the tropospheric temperature trend difference between CMIP5 models and satellite-based observations over the 1970\u20132018 period is due to respective differences in SST warming trends in regions of deep convection?",
+        "target_parent_id": "9de8d8be57d13360_p0044"
+    },
+    {
+        "question": "What is the discrepancy in mid- to upper-tropospheric temperature trends between models and observations over the satellite era, as found by Santer et al. (2017b), after removing the influence of stratospheric cooling by regression?",
+        "target_parent_id": "9de8d8be57d13360_p0044"
+    },
+    {
+        "question": "What is the exact range of the X-axis, representing temperature trend (\u00b0C/decade), in this sub-panel?",
+        "target_parent_id": "9de8d8be57d13360_p0045"
+    },
+    {
+        "question": "How many CMIP6 models, using prescribed sea surface temperatures (SSTs), are represented by blue squares in this sub-panel?",
+        "target_parent_id": "9de8d8be57d13360_p0045"
+    },
+    {
+        "question": "What is the exact range of the X-axis, representing temperature trend (\u00b0C/decade), in this sub-panel?",
+        "target_parent_id": "9de8d8be57d13360_p0046"
+    },
+    {
+        "question": "How many CMIP6 models, using prescribed SSTs, are represented by blue squares in this sub-panel?",
+        "target_parent_id": "9de8d8be57d13360_p0046"
+    },
+    {
+        "question": "What is the exact range of the X-axis, representing temperature trend (\u00b0C/decade), in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0047"
+    },
+    {
+        "question": "How many CMIP6 models, using prescribed SSTs, are represented by blue squares in this figure?",
+        "target_parent_id": "9de8d8be57d13360_p0047"
+    },
+    {
+        "question": "What is the primary driver of tropospheric temperature changes, according to Mitchell et al. (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0048"
+    },
+    {
+        "question": "How do CMIP5 climate models overestimate the observed natural variability in global mean tropospheric temperature on time scales of 5\u201320 years, as found by Pallotta and Santer (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0048"
+    },
+    {
+        "question": "What is the primary driver of the upper-stratospheric cooling since 1979, according to Mitchell (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0049"
+    },
+    {
+        "question": "How do the results of Aquila et al. (2016) support the assessment that changes in greenhouse gas concentrations are the main cause of the cooling of the middle and upper stratosphere after 1979?",
+        "target_parent_id": "9de8d8be57d13360_p0049"
+    },
+    {
+        "question": "What is the primary driver of the apparent slowdown of surface global warming compared to the 62-year rate?",
+        "target_parent_id": "9de8d8be57d13360_p0051"
+    },
+    {
+        "question": "How do CMIP5 simulations relate to the observed slower warming trend in the 1998\u20132012 period?",
+        "target_parent_id": "9de8d8be57d13360_p0051"
+    },
+    {
+        "question": "What is the primary driver of the upward revision in GMST trends from AR5 to the latest data products?",
+        "target_parent_id": "9de8d8be57d13360_p0052"
+    },
+    {
+        "question": "How do the observed GMST trends over 1998-2012 compare to the 10th-90th percentile range of simulated trends in the CMIP5 and CMIP6 simulations?",
+        "target_parent_id": "9de8d8be57d13360_p0052"
+    },
+    {
+        "question": "What is the primary driver of the internally-driven slowdown of GSAT increase during the 1998\u20132012 period?",
+        "target_parent_id": "9de8d8be57d13360_p0053"
+    },
+    {
+        "question": "According to the text, what is the estimated relationship between Pacific Decadal Variability (PDV) and GSAT, as estimated from observations and model simulations?",
+        "target_parent_id": "9de8d8be57d13360_p0053"
+    },
+    {
+        "question": "What studies, according to this section, found no net effect of updated anthropogenic aerosols on GSAT trends?",
+        "target_parent_id": "9de8d8be57d13360_p0054"
+    },
+    {
+        "question": "What is the specific solar irradiance event mentioned in this section as contributing to a negative contribution to radiative forcing, and which study is cited for this finding?",
+        "target_parent_id": "9de8d8be57d13360_p0054"
+    },
+    {
+        "question": "What is the primary driver of the heat redistribution in the top 350 m of the Indian and Pacific Oceans during the slower surface warming period?",
+        "target_parent_id": "9de8d8be57d13360_p0055"
+    },
+    {
+        "question": "According to this section, what is the main contributor to reduced surface warming during the slower surface warming period?",
+        "target_parent_id": "9de8d8be57d13360_p0055"
+    },
+    {
+        "question": "What is the primary driver of the slower GMST and GSAT increase inferred from observations in the 1998\u20132012 period?",
+        "target_parent_id": "9de8d8be57d13360_p0056"
+    },
+    {
+        "question": "According to the text, what is the reason for the end of the slower warming period, as indicated by the 2014\u20132016 El Ni\u00f1o event?",
+        "target_parent_id": "9de8d8be57d13360_p0056"
+    },
+    {
+        "question": "What is the primary driver of GSAT variability weakening under GSAT warming, as mentioned in Section 4.5.3.5 (Brown et al., 2017)?",
+        "target_parent_id": "9de8d8be57d13360_p0057"
+    },
+    {
+        "question": "How do large volcanic eruptions affect GSAT, as described in Cross-Chapter Box 4.1?",
+        "target_parent_id": "9de8d8be57d13360_p0057"
+    },
+    {
+        "question": "What is the primary driver of the systematic drying in recent decades in mainly subtropical regions, as mentioned in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0059"
+    },
+    {
+        "question": "According to Figure 3.11, what is the result of comparing the latitudinal gradient of annual precipitation changes in the European\u2013African sector simulated by CMIP6 models for the mid-Holocene with pollen-based reconstructions?",
+        "target_parent_id": "9de8d8be57d13360_p0059"
+    },
+    {
+        "question": "What is the specific region where CMIP5 models accurately reproduce an increase in moisture, related to an intensified winter storm track and decreased evaporative demand?",
+        "target_parent_id": "9de8d8be57d13360_p0060"
+    },
+    {
+        "question": "What is the effect of the exposure of the tropical shelves during glacial times on the variable response across CMIP5 models in the tropical Indo-Pacific region?",
+        "target_parent_id": "9de8d8be57d13360_p0060"
+    },
+    {
+        "question": "What is the primary driver of the observed moistening trend of the upper troposphere over the 1979\u20132005 period?",
+        "target_parent_id": "9de8d8be57d13360_p0061"
+    },
+    {
+        "question": "How do CMIP5 models show a wet bias in the tropical upper troposphere and a dry bias in the lower troposphere, according to Jiang et al. (2012) and Tian et al. (2013)?",
+        "target_parent_id": "9de8d8be57d13360_p0061"
+    },
+    {
+        "question": "What is the primary driver of the southward shift in the ITCZ prior to 1975, as detected in reanalysis using CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0062"
+    },
+    {
+        "question": "How do CMIP6 models better represent the storm tracks compared to CMIP5 models, leading to reduced precipitation biases in the North Atlantic and mid-latitudes of the Southern Hemisphere?",
+        "target_parent_id": "9de8d8be57d13360_p0062"
+    },
+    {
+        "question": "What is the primary driver of the reduction in global precipitation, particularly over the wet tropics, as mentioned in the section?",
+        "target_parent_id": "9de8d8be57d13360_p0063"
+    },
+    {
+        "question": "According to the text, what is the expected intensification of the wet\u2013dry zonal mean patterns in response to greenhouse gas and ozone changes?",
+        "target_parent_id": "9de8d8be57d13360_p0063"
+    },
+    {
+        "question": "What is the threshold for a region to be considered with a robust signal in this figure?",
+        "target_parent_id": "9de8d8be57d13360_p0064"
+    },
+    {
+        "question": "What is the method used to calculate the scaling factors (c, d) in this figure?",
+        "target_parent_id": "9de8d8be57d13360_p0064"
+    },
+    {
+        "question": "What is the primary driver of the observed strengthening contrast of precipitation over wet and dry regions, as attributed to a combination of anthropogenic and natural forcings, with anthropogenic forcings detectable in multi-signal analyses (Figure 3.14; Schurer et al., 2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0068"
+    },
+    {
+        "question": "How does the data in this section show a 2% increase in global land precipitation since the middle of the 20th century, with medium confidence, while there is low confidence in trends in land data prior to 1950 and over the ocean during the satellite era due to disagreement between datasets (Section 2.3.1.3.4)?",
+        "target_parent_id": "9de8d8be57d13360_p0068"
+    },
+    {
+        "question": "What is the primary driver of the observed precipitation increase in the Northern Hemisphere high latitudes over the period 1966-2005, according to a study using CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0069"
+    },
+    {
+        "question": "How do the observed trends in precipitation change over the period 1901-2010 compare to the modelled trends in the CMIP5 historical runs, and what might be the reasons for this discrepancy?",
+        "target_parent_id": "9de8d8be57d13360_p0069"
+    },
+    {
+        "question": "What is the primary driver of the precipitation increase observed in Northern Hemisphere high latitudes over the period 1966\u20132005, according to a study using CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0070"
+    },
+    {
+        "question": "What is the relationship between changes in eddy activity and the poleward shift of the westerlies, as found in the study by Solman and Orlanski (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0070"
+    },
+    {
+        "question": "What is the primary driver of streamflow changes in southern Europe, according to Gudmundsson et al. (2017)?",
+        "target_parent_id": "9de8d8be57d13360_p0071"
+    },
+    {
+        "question": "How do CMIP5 models reproduce spatial variations in runoff in North America, according to Sheffield et al. (2013)?",
+        "target_parent_id": "9de8d8be57d13360_p0071"
+    },
+    {
+        "question": "What is the primary driver of changes in temperature extremes, according to model projections in Seneviratne et al. (2016) and Kharin et al. (2018)?",
+        "target_parent_id": "9de8d8be57d13360_p0072"
+    },
+    {
+        "question": "How do aerosol changes affect the increase in hot extremes globally and over most continents over the 1951\u20132015 period, as found in Hu et al. (2020) and Seong et al. (2021)?",
+        "target_parent_id": "9de8d8be57d13360_p0072"
+    },
+    {
+        "question": "What is the rate at which annual maximum one-day precipitation increases with global mean temperature, as observed and simulated in models?",
+        "target_parent_id": "9de8d8be57d13360_p0073"
+    },
+    {
+        "question": "According to Section 11.4.4, what fraction of land regions show enhanced extreme precipitation and a larger probability of record-breaking one-day precipitation, and what can explain this phenomenon?",
+        "target_parent_id": "9de8d8be57d13360_p0073"
+    },
+    {
+        "question": "What is the primary driver of the observed intensification of heavy precipitation in global land regions during recent decades, according to Chapter 11?",
+        "target_parent_id": "9de8d8be57d13360_p0074"
+    },
+    {
+        "question": "What type of forcing is quantified by Dong et al. (2020) and Paik et al. (2020b) as contributing to the long-term intensification of extreme precipitation on global and continental scales?",
+        "target_parent_id": "9de8d8be57d13360_p0074"
+    },
+    {
+        "question": "What is the specific time period used for the historical simulations in the CMIP5 multi-model ensemble?",
+        "target_parent_id": "9de8d8be57d13360_p0075"
+    },
+    {
+        "question": "How are the anomalies in Figure 1 relative to, and what is the reference period used for the anomalies?",
+        "target_parent_id": "9de8d8be57d13360_p0075"
+    },
+    {
+        "question": "What is the location of the downwelling branch of the Hadley circulation cell in the zonal mean?",
+        "target_parent_id": "9de8d8be57d13360_p0077"
+    },
+    {
+        "question": "According to AR5, what was the effect of greenhouse gas forcing on the Walker circulation since the early 1990s?",
+        "target_parent_id": "9de8d8be57d13360_p0077"
+    },
+    {
+        "question": "What is the primary driver of the widening of the Hadley circulation since the 1980s, according to Chapter 2?",
+        "target_parent_id": "9de8d8be57d13360_p0078"
+    },
+    {
+        "question": "How do CMIP6 models show that the trend in the annual-mean Southern Hemisphere edge of the Hadley cell is outside the 5th\u201395th percentile range of internal variability in three out of the four reanalyses?",
+        "target_parent_id": "9de8d8be57d13360_p0078"
+    },
+    {
+        "question": "What is the primary driver of the weakening of the Pacific Walker circulation in CMIP6 simulations?",
+        "target_parent_id": "9de8d8be57d13360_p0079"
+    },
+    {
+        "question": "How do CMIP6 historical simulations show a weakening of the Pacific Walker circulation over the 20th century, despite a strengthening of the equatorial zonal SST gradient since 1870?",
+        "target_parent_id": "9de8d8be57d13360_p0079"
+    },
+    {
+        "question": "What is the primary driver of the strengthening of the Walker circulation over the period 1951-2010, as shown in Figure 3.16e?",
+        "target_parent_id": "9de8d8be57d13360_p0080"
+    },
+    {
+        "question": "According to the text, what is the source of large uncertainty in aerosol influence on the Walker circulation, as seen in CMIP6 (Figure 3.16f)?",
+        "target_parent_id": "9de8d8be57d13360_p0080"
+    },
+    {
+        "question": "What is the time period during which human influence on the poleward expansion of the zonal mean Hadley cell in the Southern Hemisphere is detectable (medium confidence)?",
+        "target_parent_id": "9de8d8be57d13360_p0081"
+    },
+    {
+        "question": "What is the reason for the low confidence in the assessment of the causes of the observed strengthening of the Pacific Walker circulation over the 1980\u20132014 period?",
+        "target_parent_id": "9de8d8be57d13360_p0081"
+    },
+    {
+        "question": "What is the primary driver of the large-magnitude intensifications and weakenings in the global monsoon, as indicated by paleoclimate proxy evidence?",
+        "target_parent_id": "9de8d8be57d13360_p0082"
+    },
+    {
+        "question": "According to studies of last millennium simulations, what forcing source is more effective in changing the global monsoon precipitation over the last millennium, compared to greenhouse gas and solar variations?",
+        "target_parent_id": "9de8d8be57d13360_p0082"
+    },
+    {
+        "question": "What is the primary driver of the 2% increase in global summer monsoon precipitation intensity from the 1950s to 1980s, as shown in Figure 3.17c?",
+        "target_parent_id": "9de8d8be57d13360_p0083"
+    },
+    {
+        "question": "According to Y. Zhang et al. (2018), how well do CMIP5 historical simulations capture the observed 1951\u20132004 trends of the global and Northern Hemisphere summer land monsoon precipitation intensity?",
+        "target_parent_id": "9de8d8be57d13360_p0083"
+    },
+    {
+        "question": "What is the primary driver of the weakening of global land summer monsoon precipitation intensity from the 1950s to the 1980s, as indicated by CMIP5 and CMIP6 historical simulations?",
+        "target_parent_id": "9de8d8be57d13360_p0084"
+    },
+    {
+        "question": "According to the text, what is the reason for the intensification of the Northern Hemisphere summer monsoon circulation since the 1980s, as shown in Figure 3.17d?",
+        "target_parent_id": "9de8d8be57d13360_p0084"
+    },
+    {
+        "question": "What is the primary driver of biases in the simulation of blocking events in the Euro-Atlantic sector, according to Davini and D'Andrea (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0085"
+    },
+    {
+        "question": "How do CMIP6 models perform in simulating the placement of the Southern Ocean storm track during summer (December to February) compared to CMIP5 models, as reported by Priestley et al. (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0085"
+    },
+    {
+        "question": "What is the primary driver of the observed poleward shift of the westerly jet and Southern Hemisphere circulation zones in austral summer?",
+        "target_parent_id": "9de8d8be57d13360_p0086"
+    },
+    {
+        "question": "According to the text, what is the magnitude of the observed reduction in cyclone activity in the Northern Hemisphere in summer?",
+        "target_parent_id": "9de8d8be57d13360_p0086"
+    },
+    {
+        "question": "What is the primary driver of the decrease in zonal wind speed in the Southern Hemisphere during the period 1985\u20132014, as shown in both ERA5 and CMIP6?",
+        "target_parent_id": "9de8d8be57d13360_p0087"
+    },
+    {
+        "question": "How do the CMIP6 models show a slightly steeper trend in zonal wind speed compared to ERA5, as indicated by the linear trend color-coding in Figure 3.19?",
+        "target_parent_id": "9de8d8be57d13360_p0087"
+    },
+    {
+        "question": "What is the primary driver of SSWs, according to Seviour et al. (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0088"
+    },
+    {
+        "question": "How do CMIP5 models with limited stratospheric resolution differ from stratosphere-resolving models in terms of SSW frequency, as found by Osprey et al. (2013) and J. Kim et al. (2017)?",
+        "target_parent_id": "9de8d8be57d13360_p0088"
+    },
+    {
+        "question": "What is the primary driver of the recent Arctic sea ice loss during summer, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0090"
+    },
+    {
+        "question": "How do CMIP6 models on average better capture the observed Arctic sea ice decline compared to CMIP5 models, as stated in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0090"
+    },
+    {
+        "question": "What is the time period covered by the data in Figure 3.20, specifically for the Arctic sea ice area in September?",
+        "target_parent_id": "9de8d8be57d13360_p0091"
+    },
+    {
+        "question": "What is the unit of measurement for the trend on the y-axis in Figure 3.20, as described in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0091"
+    },
+    {
+        "question": "What models are represented by different colors and symbols in the legend of the Arctic SIA in September panel?",
+        "target_parent_id": "9de8d8be57d13360_p0092"
+    },
+    {
+        "question": "What is the correlation coefficient (r) and p-value for the linear regression trend of the Arctic SIA in September?",
+        "target_parent_id": "9de8d8be57d13360_p0092"
+    },
+    {
+        "question": "What models are represented by different colors and symbols in the legend of the Antarctic SIA in February panel?",
+        "target_parent_id": "9de8d8be57d13360_p0093"
+    },
+    {
+        "question": "What is the correlation coefficient (r) and p-value for the linear regression trend of the Antarctic SIA in February?",
+        "target_parent_id": "9de8d8be57d13360_p0093"
+    },
+    {
+        "question": "What percentage of the observed September sea ice melting trend is explained by internal variability, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0094"
+    },
+    {
+        "question": "What is the main driver of Arctic sea ice loss since 1979, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0094"
+    },
+    {
+        "question": "What is the primary driver of the observed increase in Antarctic sea ice since 1979, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0095"
+    },
+    {
+        "question": "How does the data in this section show a 2% increase in Antarctic sea ice cover over the 1979\u20132017 period, and what is the significance of this change?",
+        "target_parent_id": "9de8d8be57d13360_p0095"
+    },
+    {
+        "question": "What is the primary driver of the general decrease in Arctic SIA from the 1980s to the 2010s, as shown in the top panel of the observations?",
+        "target_parent_id": "9de8d8be57d13360_p0099"
+    },
+    {
+        "question": "How does the natural only simulations (bottom panel) show a less pronounced decrease in Arctic SIA compared to the observations?",
+        "target_parent_id": "9de8d8be57d13360_p0099"
+    },
+    {
+        "question": "What are the distinct factors that led to the weak signal-to-noise ratio in Antarctic SIE trends, as identified in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0100"
+    },
+    {
+        "question": "What is the duration of the comprehensive satellite observations that began in 1979, and what is the observed increase in Antarctic sea ice extent during this period?",
+        "target_parent_id": "9de8d8be57d13360_p0100"
+    },
+    {
+        "question": "What is the primary driver of the observed reduction in spring snow cover over the period since 1970, according to the AR5?",
+        "target_parent_id": "9de8d8be57d13360_p0101"
+    },
+    {
+        "question": "How do CMIP6 models improve on CMIP5 models in simulating snow cover extent, specifically in terms of the median model's post-1981 declines in the March to April mean SCE?",
+        "target_parent_id": "9de8d8be57d13360_p0101"
+    },
+    {
+        "question": "What is the primary driver of the scenarios 'All forcings (29)' and 'Natural forcing (9)' used in the CMIP5 simulations?",
+        "target_parent_id": "9de8d8be57d13360_p0102"
+    },
+    {
+        "question": "What is the range of the 5th\u201395th percentile for the ensemble mean of the 'All forcings (29)' scenario?",
+        "target_parent_id": "9de8d8be57d13360_p0102"
+    },
+    {
+        "question": "What is the primary driver of the scenarios included in the legend of Panel 2, specifically 'All forcings (27)' and 'Natural forcing (9)'?",
+        "target_parent_id": "9de8d8be57d13360_p0103"
+    },
+    {
+        "question": "What is the unit of measurement represented by the Y-axis in Panel 2, specifically the SCE anomaly in 10^6 km^2?",
+        "target_parent_id": "9de8d8be57d13360_p0103"
+    },
+    {
+        "question": "What is the specific time period over which CMIP6 models show a more pronounced decrease in SCE compared to CMIP5?",
+        "target_parent_id": "9de8d8be57d13360_p0106"
+    },
+    {
+        "question": "According to Paik and Min (2020), what is the time period over which greenhouse gas influence was detected in the observed decrease of early spring SCE?",
+        "target_parent_id": "9de8d8be57d13360_p0106"
+    },
+    {
+        "question": "What is the primary driver of large-scale changes in glaciers and ice sheets, as attributed in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0107"
+    },
+    {
+        "question": "In CMIP6, what is the name of the project that includes a coordinated effort to simulate temporally evolving ice sheets, as mentioned in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0107"
+    },
+    {
+        "question": "What is the primary driver of glacier recession, according to the SROCC assessment?",
+        "target_parent_id": "9de8d8be57d13360_p0108"
+    },
+    {
+        "question": "What percentage of cumulative glacier mass loss since 1850 is attributable to anthropogenic influence, as estimated by Roe et al. (2021)?",
+        "target_parent_id": "9de8d8be57d13360_p0108"
+    },
+    {
+        "question": "What is the primary driver of the increase in summer melting of the Greenland Ice Sheet, according to the SROCC?",
+        "target_parent_id": "9de8d8be57d13360_p0110"
+    },
+    {
+        "question": "What is the approximate rate of mass loss from the Greenland Ice Sheet since the turn of the 21st century, as assessed with high confidence in Section 2.3.2.4.1?",
+        "target_parent_id": "9de8d8be57d13360_p0110"
+    },
+    {
+        "question": "What is the primary driver of Antarctic ice loss, according to the SROCC, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0111"
+    },
+    {
+        "question": "What is the level of confidence in the assessment that Antarctic ice loss has accelerated, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0111"
+    },
+    {
+        "question": "What is the primary driver of the simulated ocean's diurnal cycle in the context of coupled models?",
+        "target_parent_id": "9de8d8be57d13360_p0112"
+    },
+    {
+        "question": "How do model resolutions of 10\u2013100 km (compared to 200 km in CMIP5) impact the fidelity of ocean models, according to Hewitt et al. (2017)?",
+        "target_parent_id": "9de8d8be57d13360_p0112"
+    },
+    {
+        "question": "What is the primary driver of the warm surface temperature bias in the Southern Ocean, as mentioned in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0114"
+    },
+    {
+        "question": "How does the CMIP6 multi-model mean zonally averaged subsurface ocean temperature compare to the CMIP5 multi-model mean in terms of warm biases between 200 m and 2000 m over most latitudes?",
+        "target_parent_id": "9de8d8be57d13360_p0114"
+    },
+    {
+        "question": "What is the primary driver of the warm bias in the equatorial Pacific Ocean in the CMIP6 model, as shown in Figure 3.24?",
+        "target_parent_id": "9de8d8be57d13360_p0115"
+    },
+    {
+        "question": "How does the CMIP6 model compare to CMIP5 in terms of the magnitude of the deep ocean warm bias, as shown in Figure 3.25?",
+        "target_parent_id": "9de8d8be57d13360_p0115"
+    },
+    {
+        "question": "What is the magnitude of the deep ocean warm bias in the CMIP6 ensemble mean, compared to the equivalent CMIP5 multi-model mean bias?",
+        "target_parent_id": "9de8d8be57d13360_p0116"
+    },
+    {
+        "question": "In which ocean basins does the CMIP6 ensemble mean show a cold bias, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0116"
+    },
+    {
+        "question": "What specific ocean basins are shown in panels (a) and (b) of the multi-panel breakdown?",
+        "target_parent_id": "9de8d8be57d13360_p0119"
+    },
+    {
+        "question": "According to the text, what is the typical horizontal resolution of CMIP6 models, and what is the effect of increasing this resolution on the simulation of eddies and temperature drifts in the deeper ocean?",
+        "target_parent_id": "9de8d8be57d13360_p0119"
+    },
+    {
+        "question": "What are the suggested reasons for the persistent biases in the tropical Pacific Ocean in CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0121"
+    },
+    {
+        "question": "How does the representation of the tropical Pacific mean state in CMIP6 models compare to CMIP5 models in terms of the longitude of the 28\u00b0C isotherm?",
+        "target_parent_id": "9de8d8be57d13360_p0121"
+    },
+    {
+        "question": "What are the four factors proposed by Hourdin et al. (2015) and Richter (2015) as contributing to the tropical Atlantic SST gradient biases in CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0122"
+    },
+    {
+        "question": "According to Richter and Tokinaga (2020), what is the average change in the cold bias in the western part of the tropical Atlantic basin compared to CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0122"
+    },
+    {
+        "question": "What is the primary driver of the warm bias in the subsurface of the tropical Indian Ocean, as identified in CMIP6 models?",
+        "target_parent_id": "9de8d8be57d13360_p0123"
+    },
+    {
+        "question": "According to Figure 3.24 b,c, what is the difference in warm bias between the CMIP6 multi-model mean and CMIP5 models in the western tropical Indian Ocean?",
+        "target_parent_id": "9de8d8be57d13360_p0123"
+    },
+    {
+        "question": "What percentage of the Earth's energy change since the 1970s is attributed to the ocean, according to the AR5 and SROCC assessments?",
+        "target_parent_id": "9de8d8be57d13360_p0125"
+    },
+    {
+        "question": "What is the primary limitation in assessing ocean heat content changes below 700 m, as mentioned in the AR5?",
+        "target_parent_id": "9de8d8be57d13360_p0125"
+    },
+    {
+        "question": "What percentage of the global heat uptake is attributed to the upper, intermediate, and deeper layers, respectively, according to Figure 3.26?",
+        "target_parent_id": "9de8d8be57d13360_p0126"
+    },
+    {
+        "question": "How do CMIP6 model simulations compare to CMIP5 model simulations in terms of ocean heat content changes in the upper, intermediate, and deep-ocean layers, as shown in Figure 3.26?",
+        "target_parent_id": "9de8d8be57d13360_p0126"
+    },
+    {
+        "question": "What is the primary driver of the ocean heat content increase observed since the 1970s, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0127"
+    },
+    {
+        "question": "How does the Southern Ocean show the strongest ocean heat uptake that penetrates to deeper layers, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0127"
+    },
+    {
+        "question": "What is the range of stratification increase in the surface ocean from 1970 to 2017, as reported in the SROCC?",
+        "target_parent_id": "9de8d8be57d13360_p0128"
+    },
+    {
+        "question": "According to an idealized ocean modelling study, what percentage of the salinity enhancement signal since 1990 can be accounted for by enhanced stratification?",
+        "target_parent_id": "9de8d8be57d13360_p0128"
+    },
+    {
+        "question": "What is the primary driver of salinity biases in CMIP6 models, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0129"
+    },
+    {
+        "question": "What is the magnitude of the upper ocean (<300 m) fresh bias in the Atlantic Ocean, as shown in Figure 3.25?",
+        "target_parent_id": "9de8d8be57d13360_p0129"
+    },
+    {
+        "question": "What is the primary driver of the salinity changes in the Atlantic Ocean, as mentioned in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0130"
+    },
+    {
+        "question": "According to Figure 3.27, what is the range of PSS-78 values represented by the color bar in the top panel, which shows the observed salinity trends over the period from 1950 to 2019?",
+        "target_parent_id": "9de8d8be57d13360_p0130"
+    },
+    {
+        "question": "What is the primary driver of the basin-scale observed salinity changes, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0131"
+    },
+    {
+        "question": "According to the text, what is the confidence level in the statement that CMIP5 and CMIP6 models are only able to reproduce the observed salinity patterns in simulations that include greenhouse gas increases?",
+        "target_parent_id": "9de8d8be57d13360_p0131"
+    },
+    {
+        "question": "What is the primary driver of the gap in the observed sea level budget that current climate models do not fully resolve?",
+        "target_parent_id": "9de8d8be57d13360_p0133"
+    },
+    {
+        "question": "What is the name of the project that has provided more quantitative guidance and a comprehensive assessment of the uncertainties and best estimates of the current and future contributions of glaciers to the sea level budget?",
+        "target_parent_id": "9de8d8be57d13360_p0133"
+    },
+    {
+        "question": "What percentage of the observed sea level rise over the period 1970 to 2005 can be attributed to anthropogenically forced changes, according to Slangen et al. (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0134"
+    },
+    {
+        "question": "What percentage of the global glacier mass loss between 1991 and 2010 was attributed to anthropogenic forcing, as found by Marzeion et al. (2014)?",
+        "target_parent_id": "9de8d8be57d13360_p0134"
+    },
+    {
+        "question": "What is the primary driver of the observed GMSL rise since at least 1971?",
+        "target_parent_id": "9de8d8be57d13360_p0135"
+    },
+    {
+        "question": "According to Richter et al. (2020), what is the time period used to compare modelled sea level change with satellite altimeter observations?",
+        "target_parent_id": "9de8d8be57d13360_p0135"
+    },
+    {
+        "question": "What is the primary driver of ocean circulation, according to Buckley and Marshall (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0136"
+    },
+    {
+        "question": "What is the specific aspect of ocean circulation changes that is assessed in Section 9.2.3?",
+        "target_parent_id": "9de8d8be57d13360_p0136"
+    },
+    {
+        "question": "What is the primary driver of the weakening of the Atlantic Meridional Overturning Circulation (AMOC) observed in the mid-2000s to the mid-2010s?",
+        "target_parent_id": "9de8d8be57d13360_p0137"
+    },
+    {
+        "question": "How does the data in this section show that CMIP5 and CMIP6 models underestimate the interannual and decadal time scale AMOC variability?",
+        "target_parent_id": "9de8d8be57d13360_p0137"
+    },
+    {
+        "question": "According to Ezer et al. (2013) and Caesar et al. (2018), what is the estimated trend of the AMOC over the 20th century?",
+        "target_parent_id": "9de8d8be57d13360_p0138"
+    },
+    {
+        "question": "What is the specific time period over which the CMIP6 multi-model mean shows a clear increase in the AMOC, as simulated in Menary et al. (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0138"
+    },
+    {
+        "question": "What is the primary driver of the differing AMOC response of CMIP5 and CMIP6 models during the historical period?",
+        "target_parent_id": "9de8d8be57d13360_p0139"
+    },
+    {
+        "question": "According to the text, what is the reason for the low confidence in the influence of anthropogenic forcing on changes in AMOC strength during the 1860\u20132014 period?",
+        "target_parent_id": "9de8d8be57d13360_p0139"
+    },
+    {
+        "question": "What is the primary driver of the intensification and southward shift of surface wind in the Southern Ocean, as observed in Section 2.4.1.2?",
+        "target_parent_id": "9de8d8be57d13360_p0140"
+    },
+    {
+        "question": "What is the confidence level in the observed slowdown of the Antarctic Bottom Water circulation and commensurate Antarctic Bottom Water volume decrease since the 1990s, as reported in Section 9.2.3.2?",
+        "target_parent_id": "9de8d8be57d13360_p0140"
+    },
+    {
+        "question": "What is the primary driver of the increase in global vegetation photosynthetic activity over the last 2\u20133 decades, as attributed by the IPCC Special Report on Climate Change and Land (SRCCL)?",
+        "target_parent_id": "9de8d8be57d13360_p0141"
+    },
+    {
+        "question": "How do CMIP5 Earth System Models (ESMs) simulate the global mean land and ocean carbon sinks, according to the AR5, and what are the remaining shortcomings of carbon cycle schemes in ESMs, as noted by the IPCC SRCCL?",
+        "target_parent_id": "9de8d8be57d13360_p0141"
+    },
+    {
+        "question": "What is the primary driver of yearly sink strength variations at continental to global scales, according to Section 5.2.1.4.2?",
+        "target_parent_id": "9de8d8be57d13360_p0142"
+    },
+    {
+        "question": "How do CMIP6 terrestrial carbon cycle models partially capture the increasing amplitude of the seasonal cycle of the land carbon sink, as shown in Figure 3.32?",
+        "target_parent_id": "9de8d8be57d13360_p0142"
+    },
+    {
+        "question": "What is the primary driver of the increase in the amplitude of the seasonal cycle of atmospheric CO2, according to Piao et al. (2017)?",
+        "target_parent_id": "9de8d8be57d13360_p0143"
+    },
+    {
+        "question": "How do models with nitrogen deposition influence leaf area index trends, as described in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0143"
+    },
+    {
+        "question": "What is the primary driver of the increase in the amplitude of the seasonal cycle of global land carbon uptake, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0144"
+    },
+    {
+        "question": "According to the text, what is the confidence level in the assessment that CO2 fertilization is the main driver of the increase in the amplitude of the seasonal cycle of atmospheric CO2?",
+        "target_parent_id": "9de8d8be57d13360_p0144"
+    },
+    {
+        "question": "What is the primary driver of the observed deoxygenation in the upper 1000 m of the ocean between 1970 and 2010, as confirmed in the SROCC with medium confidence?",
+        "target_parent_id": "9de8d8be57d13360_p0145"
+    },
+    {
+        "question": "How does the representation of coastal eutrophication in ocean biogeochemical models affect the estimated oxygen declines in the interior of the ocean, as discussed in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0145"
+    },
+    {
+        "question": "What is the rate of ocean pH decline per decade for the past 40 years, as assessed in Section 2.3.3.5?",
+        "target_parent_id": "9de8d8be57d13360_p0146"
+    },
+    {
+        "question": "What is the primary driver of the observed acidification of the global surface open ocean, according to the increased evidence in recent studies?",
+        "target_parent_id": "9de8d8be57d13360_p0146"
+    },
+    {
+        "question": "What is the primary driver of the observed positive trend of the NAO/NAM indices during the second half of the 20th century, as reported in the AR5?",
+        "target_parent_id": "9de8d8be57d13360_p0148"
+    },
+    {
+        "question": "According to the text, what is the result of the multi-model multi-member ensemble mean of the trend estimated from historical simulations over the period from the 1960s, for both CMIP5 and CMIP6?",
+        "target_parent_id": "9de8d8be57d13360_p0148"
+    },
+    {
+        "question": "What is the primary driver of the long-term positive trend of the winter NAO/NAM over the 20th century, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0149"
+    },
+    {
+        "question": "How do the CMIP6 historical simulations compare to the observed NAM trends over the same period, in terms of percentile ranking?",
+        "target_parent_id": "9de8d8be57d13360_p0149"
+    },
+    {
+        "question": "What is the primary driver of the strengthening of the North Atlantic Oscillation (NAM) in boreal winter, as indicated by the box plots in Figure 3.34?",
+        "target_parent_id": "9de8d8be57d13360_p0150"
+    },
+    {
+        "question": "How do the confidence intervals in Figure 3.34 show a 2% increase in the variability of the Southern Annular Mode (SAM) index in boreal winter?",
+        "target_parent_id": "9de8d8be57d13360_p0150"
+    },
+    {
+        "question": "What is the primary driver of the positive trends in the SAM index in boreal winter, as shown in the CMIP5 historical ensemble?",
+        "target_parent_id": "9de8d8be57d13360_p0151"
+    },
+    {
+        "question": "According to the text, what is the main reason for the apparent signal-to-noise problem in seasonal and decadal hindcasts of the NAO over the period 1979-2018?",
+        "target_parent_id": "9de8d8be57d13360_p0151"
+    },
+    {
+        "question": "What is the primary driver of the observed multi-decadal variations of the NAM/NAO from the mid 20th century?",
+        "target_parent_id": "9de8d8be57d13360_p0152"
+    },
+    {
+        "question": "What is the reason for the low confidence in attribution of the NAM/NAO variations to anthropogenic forcings, as stated in (iii)?",
+        "target_parent_id": "9de8d8be57d13360_p0152"
+    },
+    {
+        "question": "What is the primary driver of the trend of the Southern Annular Mode (SAM) toward its positive phase in austral summer since the mid-20th century?",
+        "target_parent_id": "9de8d8be57d13360_p0153"
+    },
+    {
+        "question": "According to CMIP6 models, what is the chance of the 1979-2019 trend of the SAM being due to internal variability?",
+        "target_parent_id": "9de8d8be57d13360_p0153"
+    },
+    {
+        "question": "What is the primary driver of the trend of the Southern Annular Mode (SAM) toward its positive phase in recent decades, according to Solomon and Polvani (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0154"
+    },
+    {
+        "question": "How does the ozone stabilization and slight recovery since about 2000, as mentioned in the text, affect the summertime SAM trend, as shown in Figure 3.34c?",
+        "target_parent_id": "9de8d8be57d13360_p0154"
+    },
+    {
+        "question": "What is the primary driver of the SAM index variability shown in sub-panel (a) of Figure 3.35?",
+        "target_parent_id": "9de8d8be57d13360_p0155"
+    },
+    {
+        "question": "How do the CMIP5, MRI-ESM2-0, and CMIP6 models compare in terms of capturing multicentennial variability of the SAM, as shown in sub-panel (b) of Figure 3.35?",
+        "target_parent_id": "9de8d8be57d13360_p0155"
+    },
+    {
+        "question": "What is the primary driver of the observed inter-decadal modulations in ENSO amplitude and spatial pattern?",
+        "target_parent_id": "9de8d8be57d13360_p0156"
+    },
+    {
+        "question": "How do CMIP6 models compare to CMIP5 models in terms of their representation of the longitudinal extent of ENSO SST anomalies?",
+        "target_parent_id": "9de8d8be57d13360_p0156"
+    },
+    {
+        "question": "What is the primary driver of the statistically significant improvement in the representation of ENSO event-to-event SST anomaly diversity in CMIP6 models compared to CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0157"
+    },
+    {
+        "question": "According to Figure 3.36, what is the observed increase in the ENSO index value in year 0 compared to the previous years for El Ni\u00f1o events?",
+        "target_parent_id": "9de8d8be57d13360_p0157"
+    },
+    {
+        "question": "What is the method used to weight individual ensemble members in the calculation of multi-model ensemble means in Figure 3.37?",
+        "target_parent_id": "9de8d8be57d13360_p0158"
+    },
+    {
+        "question": "What is the definition of the ENSO index used in Figure 3.37, and what region is it averaged over?",
+        "target_parent_id": "9de8d8be57d13360_p0158"
+    },
+    {
+        "question": "What datasets are represented by the black and blue lines in the standard deviation of the ENSO index graph?",
+        "target_parent_id": "9de8d8be57d13360_p0159"
+    },
+    {
+        "question": "What is the difference in standard deviation between the CMIP6 and CMIP5 lines compared to the observations?",
+        "target_parent_id": "9de8d8be57d13360_p0159"
+    },
+    {
+        "question": "What chart type is used to display the seasonality metric (NDJ/MAM ratio) in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0160"
+    },
+    {
+        "question": "What is the range of seasonality metric values shown in the scatter plot with box and whisker plots?",
+        "target_parent_id": "9de8d8be57d13360_p0160"
+    },
+    {
+        "question": "What data sources are used to represent temperature anomalies over land in Figure 3.38?",
+        "target_parent_id": "9de8d8be57d13360_p0162"
+    },
+    {
+        "question": "What is the range of temperature anomalies (\u00b0C) shown in the color scale of the map in Figure 3.38?",
+        "target_parent_id": "9de8d8be57d13360_p0162"
+    },
+    {
+        "question": "What is the primary driver of the changes to ENSO event type in response to historical radiative forcing, according to Stevenson et al. (2019)?",
+        "target_parent_id": "9de8d8be57d13360_p0163"
+    },
+    {
+        "question": "How do CMIP6 models compare to observations in terms of teleconnection strength during the DJF season, as shown in Figure 3.38?",
+        "target_parent_id": "9de8d8be57d13360_p0163"
+    },
+    {
+        "question": "What is the primary driver of the Indian Ocean Basin (IOB) mode, according to Du et al. (2009)?",
+        "target_parent_id": "9de8d8be57d13360_p0164"
+    },
+    {
+        "question": "How do CMIP6 models, as found by McKenna et al. (2020), compare to CMIP5 models in terms of the positive-negative asymmetry of the IOD?",
+        "target_parent_id": "9de8d8be57d13360_p0164"
+    },
+    {
+        "question": "What is the primary driver of the observed Indian Ocean basin-average SST increase on multi-decadal and centennial time scales?",
+        "target_parent_id": "9de8d8be57d13360_p0165"
+    },
+    {
+        "question": "How does the change in correlation between Pacific Decadal Variability (PDV) and decadal variations in the IOB mode, from positive to negative during the 1980s, relate to the increase in anthropogenic forcing and volcanic eruptions?",
+        "target_parent_id": "9de8d8be57d13360_p0165"
+    },
+    {
+        "question": "What is the primary driver of the severe biases in mean state and variance for both SST and atmospheric dynamics in CMIP5 models, as reported in AR5?",
+        "target_parent_id": "9de8d8be57d13360_p0166"
+    },
+    {
+        "question": "According to the text, what is the effect of increasing model resolution on the representation of the Atlantic Ni\u00f1o and AMM modes of variability in CMIP6 models?",
+        "target_parent_id": "9de8d8be57d13360_p0166"
+    },
+    {
+        "question": "What is the primary driver of the observed changes in the Atlantic Ni\u00f1o mode and associated teleconnections over the second half of the 20th century?",
+        "target_parent_id": "9de8d8be57d13360_p0167"
+    },
+    {
+        "question": "According to the text, what specific model resolution increase may potentially improve the simulation of tropical Atlantic changes?",
+        "target_parent_id": "9de8d8be57d13360_p0167"
+    },
+    {
+        "question": "What is the primary driver of the observed slowdown of the GMST warming rate in the early 2000s, as mentioned in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0168"
+    },
+    {
+        "question": "How do CMIP6 models compare to CMIP5 models in terms of reproducing the spatial structure of PDV, according to Figure 3.39a\u2013c and Fasullo et al. (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0168"
+    },
+    {
+        "question": "What is the primary driver of PDV, according to the assessment that PDV is mostly driven by internal variability since the pre-industrial era?",
+        "target_parent_id": "9de8d8be57d13360_p0169"
+    },
+    {
+        "question": "What is the estimated variance fraction of the externally-driven to total PDV, as reported by Liguori et al. (2020)?",
+        "target_parent_id": "9de8d8be57d13360_p0169"
+    },
+    {
+        "question": "What is the percentage of externally-driven to total PDV in a multi-model large ensemble of historical simulations, according to Oudar et al. (2018)?",
+        "target_parent_id": "9de8d8be57d13360_p0170"
+    },
+    {
+        "question": "What is the finding regarding the consistency of temporal variations of PDV across the ensemble in CMIP5 last millennium simulations, as reported by Fleming and Anchukaitis (2016)?",
+        "target_parent_id": "9de8d8be57d13360_p0170"
+    },
+    {
+        "question": "What is the primary driver of the PDV since pre-industrial times, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0171"
+    },
+    {
+        "question": "How do CMIP6 models compare to CMIP5 models in terms of simulating the spatial structure and magnitude of the PDV, as stated in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0171"
+    },
+    {
+        "question": "What is the primary driver of Atlantic Multi-decadal Variability (AMV) according to the AR5 assessment?",
+        "target_parent_id": "9de8d8be57d13360_p0172"
+    },
+    {
+        "question": "How do CMIP6 models show an increase in AMV variance compared to CMIP5 models, and what is the main reason for this increase?",
+        "target_parent_id": "9de8d8be57d13360_p0172"
+    },
+    {
+        "question": "What is the primary driver of the observed AMV shift from the cold to the warm phase in the mid-1990s at the surface ocean?",
+        "target_parent_id": "9de8d8be57d13360_p0173"
+    },
+    {
+        "question": "According to the text, what is the contribution of volcanic forcing to the cold phases of the AMV-related SST anomalies observed in the 20th century?",
+        "target_parent_id": "9de8d8be57d13360_p0173"
+    },
+    {
+        "question": "What is the primary driver of the AMV phenomenon, according to the text, and what studies question this driver?",
+        "target_parent_id": "9de8d8be57d13360_p0174"
+    },
+    {
+        "question": "What is the 'signal-to-noise paradox' mentioned in the text, and what is its relevance to the models' ability to simulate the response of AMV-related atmospheric circulation phenomena?",
+        "target_parent_id": "9de8d8be57d13360_p0174"
+    },
+    {
+        "question": "What are the two external forcings thought to have modulated the AMV over the historical period, according to CMIP5 and CMIP6 models?",
+        "target_parent_id": "9de8d8be57d13360_p0175"
+    },
+    {
+        "question": "What is the primary limitation in accurately evaluating model performance in simulating AMV, as stated in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0175"
+    },
+    {
+        "question": "What is the primary driver of the observed changes in hot and cold extremes over land at the global scale, as stated in Cross-Chapter Box 3.2?",
+        "target_parent_id": "9de8d8be57d13360_p0176"
+    },
+    {
+        "question": "According to the text, what is the main driver of the observed intensification of heavy precipitation in global land regions during recent decades, as mentioned in Cross-Chapter Box 3.2?",
+        "target_parent_id": "9de8d8be57d13360_p0176"
+    },
+    {
+        "question": "What is the primary driver of the most significant changes in the sub-panels for each region and indicator?",
+        "target_parent_id": "9de8d8be57d13360_p0177"
+    },
+    {
+        "question": "How do the anthropogenic changes show a general increase in ocean heat content over time, with the anthropogenic changes being the most significant?",
+        "target_parent_id": "9de8d8be57d13360_p0177"
+    },
+    {
+        "question": "What type of analysis is used to address how well models simulate present-day and historical climate, as described in Section 3.8.2.1?",
+        "target_parent_id": "9de8d8be57d13360_p0179"
+    },
+    {
+        "question": "According to the text, what is the primary reason why some models or model families perform better than others against observational reference datasets, despite having similar scores against different datasets?",
+        "target_parent_id": "9de8d8be57d13360_p0179"
+    },
+    {
+        "question": "What are the specific variables for which CMIP6 models perform generally better than previous-generation and older models, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0180"
+    },
+    {
+        "question": "What is the primary reason for the little further progress between CMIP3 and CMIP5 for fields that were already quite well simulated in CMIP3, such as surface air temperature and outgoing longwave radiation?",
+        "target_parent_id": "9de8d8be57d13360_p0180"
+    },
+    {
+        "question": "What type of climate forcings are used to benchmark climate models for the Last Millennium?",
+        "target_parent_id": "9de8d8be57d13360_p0181"
+    },
+    {
+        "question": "According to AR5, what was the magnitude of change in the north\u2013south temperature gradient in Europe seen in proxies relative to the pre-industrial period, and was this underestimated by CMIP5/PMIP3 models?",
+        "target_parent_id": "9de8d8be57d13360_p0181"
+    },
+    {
+        "question": "What is the primary reference observational data set used in Figure 3.43, and what are the corresponding correlation values shown between this dataset and the CMIP6 models?",
+        "target_parent_id": "9de8d8be57d13360_p0182"
+    },
+    {
+        "question": "What is the resolution at which the pattern correlations in Figure 3.43 are computed, and what is the source of the data used for this computation?",
+        "target_parent_id": "9de8d8be57d13360_p0182"
+    },
+    {
+        "question": "What is the primary driver of the very likely assessed ranges presented in Section 2.3.1.1, as shown by the light orange shading in Figure 3.44 panel (a)?",
+        "target_parent_id": "9de8d8be57d13360_p0183"
+    },
+    {
+        "question": "How does the data in this section show a 2% increase in GSAT anomalies for the five PMIP4 periods, as compared to the CMIP5-PMIP3 models, in Figure 3.44 panel (a)?",
+        "target_parent_id": "9de8d8be57d13360_p0183"
+    },
+    {
+        "question": "What is the primary driver of the slight mid-Holocene cooling in PMIP4 compared with PMIP3, as mentioned in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0184"
+    },
+    {
+        "question": "How does the data in this section show that the PMIP4 multi-model mean is within the range of reconstructed regional averages for four out of seven regional variables, and for which variables is this the case?",
+        "target_parent_id": "9de8d8be57d13360_p0184"
+    },
+    {
+        "question": "What is the primary driver of improvements in precipitation simulation in CMIP6 models compared to CMIP5 models?",
+        "target_parent_id": "9de8d8be57d13360_p0185"
+    },
+    {
+        "question": "According to the text, what is the typical resolution of the high-resolution class of models participating in HighResMIP?",
+        "target_parent_id": "9de8d8be57d13360_p0185"
+    },
+    {
+        "question": "What is the primary driver of the fertilization effect on vegetation and carbon uptake mentioned in this section?",
+        "target_parent_id": "9de8d8be57d13360_p0186"
+    },
+    {
+        "question": "According to this section, what is the impact of introducing explicit coupling between interactive atmospheric chemistry and aerosol schemes on estimates of historical aerosol radiative forcing?",
+        "target_parent_id": "9de8d8be57d13360_p0186"
+    },
+    {
+        "question": "What is the time period covered by the observed warming data in Figure 1?",
+        "target_parent_id": "9de8d8be57d13360_p0190"
+    },
+    {
+        "question": "What is the specific range of individual simulations shown by the coloured bands in Figure 1?",
+        "target_parent_id": "9de8d8be57d13360_p0190"
+    },
+    {
+        "question": "What is the estimated contribution of natural variability to global surface warming over the entire historical period (1850\u20132020)?",
+        "target_parent_id": "9de8d8be57d13360_p0192"
+    },
+    {
+        "question": "According to the text, what is the primary driver of the warming of about 1.1\u00b0C observed during the period 1850\u20132020?",
+        "target_parent_id": "9de8d8be57d13360_p0192"
+    },
+    {
+        "question": "What is the temperature range of global change caused by natural variability since 1850, according to the text?",
+        "target_parent_id": "9de8d8be57d13360_p0194"
+    },
+    {
+        "question": "What is the source of the data used to illustrate the influence of natural variability in Figure 1, as mentioned in the text?",
+        "target_parent_id": "9de8d8be57d13360_p0194"
+    },
+    {
+        "question": "What is the primary driver of global warming according to the current and previous generations of climate models?",
+        "target_parent_id": "9de8d8be57d13360_p0196"
+    },
+    {
+        "question": "How do the multi-model averages of the three most recent generations of climate models compare against observations in terms of correlation, as shown in FAQ 3.3 Figure 1?",
+        "target_parent_id": "9de8d8be57d13360_p0196"
+    },
+    {
+        "question": "What is the primary driver of the improvements in climate models, according to this section?",
+        "target_parent_id": "9de8d8be57d13360_p0197"
+    },
+    {
+        "question": "What is the time period used for comparing yearly averages of CMIP3, CMIP5, and CMIP6 models with reference observations in Figure 1?",
+        "target_parent_id": "9de8d8be57d13360_p0197"
+    }
+]

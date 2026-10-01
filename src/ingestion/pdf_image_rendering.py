@@ -91,3 +91,23 @@ def extract_figure_captions(page_text: str) -> list[dict]:
             })
             
     return captions
+
+
+def clean_markdown_text(text: str) -> str:
+    """Strips Markdown formatting, table artifacts, and excessive whitespace."""
+    # 1. Remove Markdown headers (e.g., #, ##, ######)
+    text = re.sub(r'^#+\s*', '', text, flags=re.MULTILINE)
+    
+    # 2. Remove bold and italic markers (**, *, __)
+    text = re.sub(r'\*\*|\*|__', '', text)
+    
+    # 3. Remove HTML tags (like <br>)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    
+    # 4. Remove table structural characters (| and ---)
+    text = re.sub(r'\||-{3,}', ' ', text)
+    
+    # 5. Replace multiple newlines and spaces with a single space
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    return text

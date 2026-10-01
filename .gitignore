@@ -1,5 +1,45 @@
-data/
-extracted_data/
-*.ipynb
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Caches & Environment
+.env
+.venv/
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+*.docx
+*.ipynb
+*.ipynb_checkpoints
+
+# Jupyter & IDEs
+.ipynb_checkpoints
+.vscode/
+.idea/
+
+# Large Model weights & HuggingFace caches
+hf_cache/
+models/
+*.bin
+*.safetensors
+*.pt
+
+# Database local storage & indices
 vector_database/
+chroma_db/
+qdrant_db/
+
+# Evaluation outputs & working CSVs (keep templates)
+*.csv
+# !complete_rag_evaluation.csv
+!evaluation_results.csv
+!retrieval_metrics.csv
+
+# Large Data & PDF binaries
+*.pdf
+data/extracted_data/**/images/*.png
+data/extracted_data/**/manifest/*.jsonl

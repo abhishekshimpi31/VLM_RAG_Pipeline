@@ -12,8 +12,12 @@ import datetime
 import gc
 import shutil
 
-import config
-from file_versioning import get_latest_file
+try:
+    import config
+    from ..common.file_versioning import get_latest_file
+except ImportError:
+    import config
+    from file_versioning import get_latest_file
 
 warnings.filterwarnings("ignore")
 logging.getLogger("bitsandbytes").setLevel(logging.ERROR)
@@ -32,7 +36,7 @@ def initialize_model():
         print("Model and processor are already initialized. Skipping load.")
         return _GLOBAL_MODEL, _GLOBAL_PROCESSOR
 
-    print("Loading Qwen2-VL-7B in 8-bit for A100 GPU...")
+    print("Loading Qwen2-VL-7B in 8-bit for GPU...")
 
     # Define the 8-bit quantization configuration
     quantization_config = BitsAndBytesConfig(
@@ -41,7 +45,7 @@ def initialize_model():
 
     # Load the model and assign it to the global variable
     _GLOBAL_MODEL = Qwen2VLForConditionalGeneration.from_pretrained(
-        "Qwen/Qwen2-VL-7B-Instruct",
+        getattr(config, "VLM_MODEL_NAME", "Qwen/Qwen2-VL-7B-Instruct"),
         torch_dtype=torch.float16,
         device_map="auto",
         quantization_config=quantization_config,
@@ -49,7 +53,9 @@ def initialize_model():
     )
 
     # Load the processor and assign it to the global variable
-    _GLOBAL_PROCESSOR = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+    _GLOBAL_PROCESSOR = AutoProcessor.from_pretrained(
+        getattr(config, "VLM_MODEL_NAME", "Qwen/Qwen2-VL-7B-Instruct")
+    )
 
     print("Model loaded successfully in 8-bit precision!")
 
@@ -61,7 +67,16 @@ def process_image_batch(model, processor, batch_tasks):
 
     for task in batch_tasks:
         raw_path = task["image_path"].replace("\\", "/")
-        clean_path = os.path.join("/content/drive/MyDrive/Rag_Pipeline/", raw_path)
+        
+        # Safe path resolution: checks Colab, local relative, or absolute paths
+        colab_path = os.path.join("/content/drive/MyDrive/Rag_Pipeline/", raw_path)
+        if os.path.exists(colab_path):
+            clean_path = colab_path
+        elif os.path.exists(raw_path):
+            clean_path = raw_path
+        else:
+            clean_path = str(getattr(config, "BASE_DIR", os.getcwd()) / raw_path)
+
         print(f"Opening: {clean_path} for {task['figure_id']}")
 
         pil_img = Image.open(clean_path).convert("RGB")
@@ -110,7 +125,7 @@ def process_image_batch(model, processor, batch_tasks):
     return results
 
 
-def run_vlm_router(model, processor, base_dir: str = "pipeline_data", batch_size: int = 8):
+def run_vlm_router(model, processor, base_dir: str = "data/extracted_data/", batch_size: int = 8):
     for chapter_folder in os.listdir(base_dir):
         chapter_path = os.path.join(base_dir, chapter_folder)
         if not os.path.isdir(chapter_path):
@@ -166,7 +181,7 @@ def run_vlm_router(model, processor, base_dir: str = "pipeline_data", batch_size
             print(f"  [✔] Registry updated. Archived manifest.")
 
 if __name__ == "__main__":
-    # BASE_DIR = "data/extracted_data/"
+    BASE_DIR = getattr(config, "EXTRACTED_DATA_DIR", "data/extracted_data/")
     batch_size = 8
     # _GLOBAL_MODEL, _GLOBAL_PROCESSOR = initialize_model()
-    # run_vlm_router(base_dir=BASE_DIR, batch_size=8, model=_GLOBAL_MODEL, processor=_GLOBAL_PROCESSOR)
+    # run_vlm_router(base_dir=str(BASE_DIR), batch_size=8, model=_GLOBAL_MODEL, processor=_GLOBAL_PROCESSOR)
