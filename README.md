@@ -6,7 +6,7 @@ Unlike standard RAG pipelines that use naive semantic or fixed-character splitti
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```
                     ┌──────────────────────────────────────────────┐
@@ -19,7 +19,7 @@ Unlike standard RAG pipelines that use naive semantic or fixed-character splitti
              ▼                                                           ▼
    [Figure / Image Detection]                                   [Section AST Parser]
              │                                                           │
-   [Qwen2-VL-7B Ingestion]                                                │
+   [Qwen2-VL-7B Ingestion]                                               │
    (Extract axes, units, trends)                                         │
              │                                                           │
              ▼                                                           │
@@ -73,7 +73,7 @@ Unlike standard RAG pipelines that use naive semantic or fixed-character splitti
 
 ---
 
-## 📁 Project Directory Structure
+## Project Directory Structure
 
 ```plaintext
 Rag_Pipeline/
@@ -125,7 +125,7 @@ Rag_Pipeline/
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 1. **5-Tier AST (Abstract Syntax Tree) Splitting**:
    Parses documents according to native Markdown headers (from `# Chapter` down to `###### Subsubsubsubection`), preserving exact hierarchical document context and citation breadcrumbs.
@@ -145,7 +145,7 @@ Rag_Pipeline/
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### 1. Prerequisites
 * Python 3.10+
@@ -166,15 +166,9 @@ Or install in editable package mode:
 pip install -e .
 ```
 
-### 4. Configure Environment
-Copy `.env.example` to `.env` to customize model names or directory paths:
-```bash
-cp .env.example .env
-```
-
 ---
 
-## 💻 Usage & Execution
+## Usage & Execution
 
 ### Phase 1: Ingestion & Vectorization
 Process hydrated Markdown files, generate dense & sparse vectors, and index parent documents:
@@ -187,21 +181,6 @@ python scripts/run_ingestion.py
 Query the scientific literature directly from the terminal:
 ```bash
 python scripts/run_inference.py --query "What is the likely range of human-induced warming?"
-```
-
-#### 2. FastAPI Backend Service
-Launch the RESTful API with automated Swagger docs:
-```bash
-python scripts/run_api.py
-# API is accessible at: http://localhost:8000
-# Interactive Swagger Documentation: http://localhost:8000/docs
-```
-
-#### 3. Streamlit Chatbot Interface
-Launch the multi-modal scientific assistant UI:
-```bash
-python scripts/run_ui.py
-# Streamlit UI opens at: http://localhost:8501
 ```
 
 ### Phase 3: Multi-Modal Figure Extraction (Optional / Advanced)
@@ -230,7 +209,7 @@ python scripts/run_ui.py
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 Run the test suite to verify pipeline utilities, config loading, FastAPI endpoints, and metric computations:
 ```bash
