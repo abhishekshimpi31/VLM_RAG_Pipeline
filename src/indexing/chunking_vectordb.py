@@ -19,15 +19,11 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_classic.storage import LocalFileStore
 
-# Custom module imports with package and standalone fallback
-try:
-    from .dynamic_splitter import token_length
-    from ..common.file_versioning import get_file_hash 
-    import config
-except ImportError:
-    from dynamic_splitter import token_length
-    from file_versioning import get_file_hash 
-    import config
+
+from .dynamic_splitter import token_length
+from ..common.file_versioning import get_file_hash 
+import config
+
 
 # -------------------------------------------------------------
 # 0. System Configuration

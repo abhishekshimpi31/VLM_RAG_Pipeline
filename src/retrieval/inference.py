@@ -83,7 +83,7 @@ def is_global_summary_query(query: str) -> bool:
     return any(trigger in query.lower() for trigger in trigger_words)
 
 
-@traceable(run_type="retriever", name="query_expansion")
+@traceable(run_type="query_expansion", name="Query Expansion")
 def expand_query(original_query: str) -> str:
     try:
         chain = QUERY_EXPANSION_PROMPT | llm
@@ -153,7 +153,7 @@ def format_references(safe_context_json: str):
 # ==============================================================================
 # Child-Level Reranking
 # ==============================================================================
-@traceable(run_type="retriever", name="bge_cross_encoder_child_rerank")
+@traceable(run_type="child_reranking", name="bge_cross_encoder_child_rerank")
 def child_reranking(user_query: str):
     """
     Standalone diagnostic function to test direct child-level retrieval 
@@ -212,7 +212,7 @@ def child_reranking(user_query: str):
     return child_docs_retrieved, ordered_parent_ids, base_docs_for_expansion
 
 
-@traceable(run_type="retriever", name="bge_cross_encoder_parent_rerank")
+@traceable(run_type="parent_reranking", name="bge_cross_encoder_parent_rerank")
 def parent_reranking(user_query: str):
     """
     Standalone diagnostic function to test direct parent-level retrieval 
@@ -260,7 +260,7 @@ def parent_reranking(user_query: str):
 # ==============================================================================
 # 3. MAIN INFERENCE PIPELINE
 # ==============================================================================
-@traceable(run_type="retriever", name="generate_retrieval_context")
+@traceable(run_type="retrieval_context_generation", name="generate_retrieval_context")
 def generate_context(user_query: str):
     """
     Production RAG Inference:
@@ -294,7 +294,7 @@ def generate_context(user_query: str):
     return safe_context, expanded_docs, references, retrieved_parents
 
 
-@traceable(run_type="retriever", name="generate_answer")
+@traceable(run_type="answer_generation", name="generate_answer")
 def generate_answer(user_query: str, chat_history: Optional[list] = None):
     """
     Executes conversational RAG pipeline:
