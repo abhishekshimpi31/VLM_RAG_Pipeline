@@ -14,6 +14,7 @@ from FlagEmbedding import FlagReranker
 from qdrant_client.http import models as rest
 
 from src.common.model_dependency import get_embedding_model, get_llm, get_reranker
+from src.retrieval.guardrails import validate_input
 from src.retrieval.semantic_cache import get_cached_result, init_cache_collection, set_cached_result
 
 from ..indexing.chunking_vectordb import build_safe_context, retriever, client, vector_store
@@ -302,6 +303,12 @@ def generate_answer(user_query: str, chat_history: Optional[list] = None):
     2. Retrieves parent documents via Qdrant & cross-encoder reranking.
     3. Synthesizes an answer strictly grounded in context with [n] citations.
     """
+
+    is_safe, refusal_message = validate_input(user_query)
+    if not is_safe:
+        return refusal_message, "{}", [], [], []
+
+    
     retrieval_query = user_query
     formatted_history = format_chat_history(chat_history) if chat_history else ""
 
