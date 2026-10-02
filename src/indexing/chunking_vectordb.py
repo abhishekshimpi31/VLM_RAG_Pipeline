@@ -19,6 +19,8 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from langchain_classic.retrievers import ParentDocumentRetriever
 from langchain_classic.storage import LocalFileStore
 
+from src.common.model_dependency import get_embedding_model, get_embedding_tokenizer, get_llm_tokenizer, get_sparse_embedding_model
+
 
 from .dynamic_splitter import token_length
 from ..common.file_versioning import get_file_hash 
@@ -37,24 +39,14 @@ COLLECTION_NAME = getattr(config, "COLLECTION_NAME", "ipcc_hybrid_chunks")
 EMBEDDING_MODEL_NAME = getattr(config, "EMBEDDING_MODEL_NAME", "BAAI/bge-large-en-v1.5")
 LLM_TOKENIZER_NAME = getattr(config, "LLM_TOKENIZER_NAME", "hf-internal-testing/llama-tokenizer")
 
-tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_MODEL_NAME)
-llm_tokenizer = AutoTokenizer.from_pretrained(LLM_TOKENIZER_NAME)
+tokenizer = get_embedding_tokenizer()
+llm_tokenizer = get_llm_tokenizer()
 
 # -------------------------------------------------------------
-# 1. Initialize Models (With Production Normalization)
+# 1. Initialize Models (Via Centralized Models Module)
 # -------------------------------------------------------------
-logging.info("Initializing Embedding Model...")
-
-embedding_model = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL_NAME,
-    encode_kwargs={'normalize_embeddings': True},
-    query_encode_kwargs={
-        "normalize_embeddings": True,
-        "prompt": "Represent this sentence for searching relevant passages: "
-    }
-)
-
-sparse_embeddings = FastEmbedSparse(model_name=getattr(config, "SPARSE_MODEL_NAME", "Qdrant/bm25"))
+embedding_model = get_embedding_model()
+sparse_embeddings = get_sparse_embedding_model()
 
 # -------------------------------------------------------------
 # 2. Setup Qdrant & Disk-Tiering

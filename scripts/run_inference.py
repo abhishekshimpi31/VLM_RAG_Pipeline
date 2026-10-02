@@ -18,7 +18,7 @@ def main():
     parser.add_argument(
         "--query", 
         type=str, 
-        default="What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850–1900?",
+        default="What is the best estimate of the anthropogenic attributable warming rate in degrees Celsius per decade for the period 2010\u20132019?",
         help="Scientific question to query the pipeline with"
     )
     args = parser.parse_args()

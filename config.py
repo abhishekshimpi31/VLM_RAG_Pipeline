@@ -49,6 +49,9 @@ LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "llama3.1")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.1"))
 LLM_NUM_CTX = int(os.getenv("LLM_NUM_CTX", "8000"))
 
+# Cache collection
+CACHE_COLLECTION_NAME = os.getenv("CACHE_COLLECTION_NAME", "query_cache")
+
 # ==============================================================================
 # 3. SPLITTER & RETRIEVAL HYPERPARAMETERS (Preserved Exactly)
 # ==============================================================================

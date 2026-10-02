@@ -13,6 +13,9 @@ from langsmith import traceable
 from FlagEmbedding import FlagReranker
 from qdrant_client.http import models as rest
 
+from src.common.model_dependency import get_embedding_model, get_llm, get_reranker
+from src.retrieval.semantic_cache import get_cached_result, init_cache_collection, set_cached_result
+
 from ..indexing.chunking_vectordb import build_safe_context, retriever, client, vector_store
 from ..indexing.dynamic_splitter import expand_following_neighbors
 import config
@@ -26,6 +29,10 @@ QA_PROMPT_TEMPLATE = config.QA_PROMPT_TEMPLATE
 PROMPT_TEMPLATE_TEXT = QA_PROMPT_TEMPLATE
 
 QUERY_EXPANSION_PROMPT = PromptTemplate.from_template(QUERY_EXPANSION_PROMPT_TEMPLATE)
+
+EMBEDDING_MODEL_NAME = getattr(config, "EMBEDDING_MODEL_NAME", "BAAI/bge-large-en-v1.5")
+
+CACHE_COLLECTION_NAME = config.CACHE_COLLECTION_NAME
 
 STRICT_QA_PROMPT = PromptTemplate(
     template=QA_PROMPT_TEMPLATE,
@@ -48,6 +55,14 @@ else:
     CONDENSE_QUESTION_PROMPT = None
 
 
+# ==============================================================================
+# 1. LLM & RERANKER SETUP
+# ==============================================================================
+llm = get_llm()
+reranker = get_reranker()
+embedding_model = get_embedding_model()
+
+
 def format_chat_history(chat_history: list) -> str:
     """Formats message history [{'role': 'user'|'assistant', 'content': '...'}] into dialogue string."""
     if not chat_history:
@@ -60,21 +75,6 @@ def format_chat_history(chat_history: list) -> str:
             lines.append(f"{role}: {content}")
     return "\n".join(lines)
 
-
-# ==============================================================================
-# 1. LLM & RERANKER SETUP
-# ==============================================================================
-llm_model_name = getattr(config, "LLM_MODEL_NAME", "llama3.1")
-llm_temp = getattr(config, "LLM_TEMPERATURE", 0.1)
-llm_ctx = getattr(config, "LLM_NUM_CTX", 8000)
-reranker_model = getattr(config, "RERANKER_MODEL_NAME", "BAAI/bge-reranker-large")
-
-print(f"[INFO] Loading Ollama {llm_model_name}...")
-llm = Ollama(model=llm_model_name, temperature=llm_temp, num_ctx=llm_ctx, verbose=False)
-
-print(f"[INFO] Loading FlagReranker ({reranker_model})...")
-reranker = FlagReranker(reranker_model, use_fp16=True)
-
 # ==============================================================================
 # 2. UTILITY FUNCTIONS
 # ==============================================================================
@@ -83,7 +83,7 @@ def is_global_summary_query(query: str) -> bool:
     return any(trigger in query.lower() for trigger in trigger_words)
 
 
-@traceable(run_type="query_expansion", name="Query Expansion")
+@traceable(run_type="chain", name="Query Expansion")
 def expand_query(original_query: str) -> str:
     try:
         chain = QUERY_EXPANSION_PROMPT | llm
@@ -153,7 +153,7 @@ def format_references(safe_context_json: str):
 # ==============================================================================
 # Child-Level Reranking
 # ==============================================================================
-@traceable(run_type="child_reranking", name="bge_cross_encoder_child_rerank")
+@traceable(run_type="chain", name="bge_cross_encoder_child_rerank")
 def child_reranking(user_query: str):
     """
     Standalone diagnostic function to test direct child-level retrieval 
@@ -212,7 +212,7 @@ def child_reranking(user_query: str):
     return child_docs_retrieved, ordered_parent_ids, base_docs_for_expansion
 
 
-@traceable(run_type="parent_reranking", name="bge_cross_encoder_parent_rerank")
+@traceable(run_type="chain", name="bge_cross_encoder_parent_rerank")
 def parent_reranking(user_query: str):
     """
     Standalone diagnostic function to test direct parent-level retrieval 
@@ -260,7 +260,7 @@ def parent_reranking(user_query: str):
 # ==============================================================================
 # 3. MAIN INFERENCE PIPELINE
 # ==============================================================================
-@traceable(run_type="retrieval_context_generation", name="generate_retrieval_context")
+@traceable(run_type="retriever", name="generate_retrieval_context")
 def generate_context(user_query: str):
     """
     Production RAG Inference:
@@ -268,7 +268,7 @@ def generate_context(user_query: str):
     2. Reranking fetched Parent docs
     3. Sibling chunk expansion & token budgeting
     """
-    
+
     # -------------------------------------------------------------------------
     # Child Reranking
     # -------------------------------------------------------------------------
@@ -294,7 +294,7 @@ def generate_context(user_query: str):
     return safe_context, expanded_docs, references, retrieved_parents
 
 
-@traceable(run_type="answer_generation", name="generate_answer")
+@traceable(run_type="chain", name="generate_answer")
 def generate_answer(user_query: str, chat_history: Optional[list] = None):
     """
     Executes conversational RAG pipeline:
@@ -321,6 +321,21 @@ def generate_answer(user_query: str, chat_history: Optional[list] = None):
             print(f"[WARNING] Conversational query condensation skipped: {e}")
             retrieval_query = user_query
 
+    # Checking answer in the cache first
+    cached_result = get_cached_result(
+            query=retrieval_query,
+            client=client,
+            rest=rest,
+            embedding_model=embedding_model,
+            collection_name=config.CACHE_COLLECTION_NAME
+        )
+    
+    if cached_result:
+        answer_text, safe_context, expanded_docs, references =  cached_result
+        print(f"\n[CACHE HIT - ~15ms]\n{answer_text}")
+        return answer_text, safe_context, expanded_docs, references, []
+    
+    print("\n[CACHE MISS] Executing Child-Rerank-Parent pipeline...")
     safe_context, expanded_docs, references, retrieved_parents = generate_context(user_query=retrieval_query)
 
     if formatted_history:
@@ -340,6 +355,19 @@ def generate_answer(user_query: str, chat_history: Optional[list] = None):
 
     print("\n[ANSWER]\n", answer_text)
 
+    # Saving the result to cache for future queries
+    set_cached_result(
+        query=user_query,
+        answer_text=answer_text,
+        safe_context=safe_context,
+        expanded_docs=expanded_docs,
+        references=references,
+        client=client,
+        rest=rest,
+        embedding_model=embedding_model,
+        collection_name=config.CACHE_COLLECTION_NAME
+    )
+
     return answer_text, safe_context, expanded_docs, references, retrieved_parents
 
 
@@ -348,8 +376,7 @@ def generate_answer(user_query: str, chat_history: Optional[list] = None):
 # 4. EXECUTION
 # ==============================================================================
 if __name__ == "__main__":
-    test_query = "What is the likely range of the contribution of internal variability to global surface temperature warming between 2010 and 2019 relative to 1850\u20131900?"
-    
+    test_query = "What is the best estimate of the anthropogenic attributable warming rate in degrees Celsius per decade for the period 2010\u20132019?"    
     try:
         generate_answer(user_query=test_query)
         
