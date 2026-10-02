@@ -10,6 +10,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.load import loads
 
+from src.common.model_dependency import get_chat_llm
+
 from ..ingestion.pdf_image_rendering import clean_markdown_text
 from ..indexing.chunking_vectordb import store, banned_headers
 import config
@@ -24,7 +26,7 @@ NUM_CHUNKS_TO_PROCESS = 500 # Limit this during testing so it doesn't run for ho
 
 # Use a stronger local model if possible, and enforce JSON output
 print("[INFO] Loading Ollama for Synthetic Generation...")
-llm = ChatOllama(model=getattr(config, "LLM_MODEL_NAME", "llama3"), temperature=0.1, format="json")
+llm = get_chat_llm(temperature=0.1, format="json")
 
 # 2. Setup Splitter (Must match your ingestion pipeline)
 headers_to_split_on = getattr(config, "HEADERS_TO_SPLIT_ON", [

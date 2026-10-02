@@ -7,6 +7,8 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+from src.common.model_dependency import get_chat_llm
+
 # ==============================================================================
 # 0. HOTFIX FOR RAGAS DEPENDENCY BUG
 # ==============================================================================
@@ -38,7 +40,7 @@ OUTPUT_CSV = getattr(config, "EVALUATION_RESULTS_OUTPUT_CSV", "data/extracted_da
 MAX_TEST_SAMPLES = None  # Set to an integer (e.g. 18) or None to evaluate all
 
 # Judge models
-llm = ChatOllama(model=getattr(config, "LLM_MODEL_NAME", "llama3"), temperature=0.0, num_ctx=6000, format="json")
+llm = get_chat_llm(temperature=0.0, num_ctx=6000, format="json")
 ragas_llm = LangchainLLMWrapper(llm)
 ragas_embed = LangchainEmbeddingsWrapper(embedding_model)
 

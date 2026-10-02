@@ -1,13 +1,15 @@
 from langchain_core.documents import Document
 from transformers import AutoTokenizer
 
+from src.common.model_dependency import get_splitter_tokenizer
+
 try:
     import config
     MODEL_NAME = getattr(config, "MINILM_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2")
 except ImportError:
     MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+tokenizer = get_splitter_tokenizer()
 
 def token_length(text: str) -> int:
     return len(tokenizer.encode(text, add_special_tokens=False, truncation=True, max_length=999999))
