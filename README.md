@@ -86,6 +86,7 @@ Rag_Pipeline/
 ├── src/                               # Modular Source Package
 │   ├── common/                        # Shared file utilities & hashing
 │   │   ├── __init__.py
+|   |   ├── model_dependency.py        # Centralised model initialisation 
 │   │   └── file_versioning.py         # File hashing, TTL retention, safe chapter IDs
 │   ├── ingestion/                     # Multi-modal extraction & Markdown hydration
 │   │   ├── __init__.py
@@ -100,6 +101,8 @@ Rag_Pipeline/
 │   │   └── chunking_vectordb.py       # AST splitters, Qdrant hybrid setup, batched ingestion
 │   ├── retrieval/                     # Search, reranking & LLM generation
 │   │   ├── __init__.py
+│   │   ├── guardrails.py              # Pythoon based guardrails to protect the backend
+│   │   ├── semantic_cache.py          # Cached alredy executed queries to reduced the latency and compute
 │   │   └── inference.py               # Child reranker, safe token budgeting, grounded QA
 │   └── evaluation/                    # Benchmarking & automated metrics
 │       ├── __init__.py
